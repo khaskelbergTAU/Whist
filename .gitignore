@@ -50,3 +50,5 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+/Whist-Server/gradle/wrapper/gradle-wrapper.jar
+/Whist-Server/gradle/wrapper/gradle-wrapper.properties
