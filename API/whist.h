@@ -1,5 +1,5 @@
-#ifndef WHIST_H
-#define WHIST_H
+#ifndef _WHIST_H
+#define _WHIST_H
 #include <stddef.h>
 typedef enum suit {
 	NONE,
@@ -29,5 +29,4 @@ size_t place_final_bet(suit_e trump, size_t highest_bidder, size_t final_bets[4]
 card_t play_card(round_t previous_round, round_t current_round);
 
 void game_over(round_t final_round);
-#endif
-
+#endif /* _WHIST_H */

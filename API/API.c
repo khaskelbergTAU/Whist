@@ -45,7 +45,7 @@ void init_bets_api() {
 
 void final_bets_api() {
 	final_bets_args_t args;
-	int result;
+	size_t result;
 	if(fread(&args, sizeof(args), 1, stdin) != 1) {
 		fprintf(stderr, "Error: reading final bet arguments\n");
 		exit(-1);
@@ -58,6 +58,7 @@ void final_bets_api() {
 		fprintf(stderr, "Error: writing final bet result\n");
 		exit(-1);
 	}
+	fflush(stdout);
 }
 
 void play_card_api() {
@@ -90,15 +91,14 @@ void game_over_api() {
 	}
 }
 
-int main(int argc, char **argv) {
-	fprintf(stderr, "aaaa");
+int main(int argc, char **argv)
+{
 	char op;
 	while(1) {
 		if(fread(&op, 1, 1, stdin) != 1) {
 			fprintf(stderr, "Error: reading the operation code\n");
 			exit(-1);
 		}
-		fprintf(stderr, "aaaazzzz%c", op);
 		switch(op) {
 			case 'i':
 				init_bets_api();
@@ -118,4 +118,3 @@ int main(int argc, char **argv) {
 		}
 	}
 }
-

@@ -53,13 +53,22 @@ void set_player(size_t player_id, size_t exec_id) {
 		//src -> dst
 		assert(dup2(stdin_fd[0], 0) != -1);
 		assert(dup2(stdout_fd[1], 1) != -1);
+		assert(close(stdin_fd[0]) == 0);
+		assert(close(stdin_fd[1]) == 0);
+		assert(close(stdout_fd[0]) == 0);
+		assert(close(stdout_fd[1]) == 0);
 		//assert(dup2(player_err_fd[player_id], 2) != -1);
 		execl(player_execs[exec_id], player_execs[exec_id], (char *)NULL);
-	} else {
-		printf("post fork\n");
+		fprintf(stderr, "execl failed\n");
+		exit(1);
+	}
+	else
+	{
 		player_in_fd[player_id] = stdin_fd[1];
 		player_out_fd[player_id] = stdout_fd[0];
 		player_pids[player_id] = child_pid;
+		assert(close(stdin_fd[0]) == 0);
+		assert(close(stdout_fd[1]) == 0);
 	}
 	assert((player_in_fp[player_id] = fdopen(player_in_fd[player_id], "w")) != NULL);
 	assert((player_out_fp[player_id] = fdopen(player_out_fd[player_id], "r")) != NULL);
@@ -103,7 +112,6 @@ size_t place_final_bet(size_t player_id, suit_e trump, size_t highest_bidder, si
 	if(read(player_out_fd[player_id], &res, sizeof(res)) != sizeof(res)) {
 		return INVALID_FINAL_BET;
 	}
-	printf("bbbbbb\n");
 	return res;
 }
 
