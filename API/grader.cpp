@@ -145,6 +145,9 @@ round_t play_round(card_t hands[4][13], size_t starting_player, round_t last_rou
         if(!legal_play(hands[(starting_player + player) % 4], played_card, starting_suit, trump)) {
             // replace player with bot
             played_card = play_card(last_round, current_round);
+            if(player == 0) {
+                starting_suit = played_card.suit;
+            }
         }
         remove_card_from_hand(hands[(starting_player + player) % 4], played_card);
         current_round.cards[(starting_player + player) % 4] = played_card;
@@ -193,6 +196,7 @@ int main(int argc, char * argv[]) {
             starting_player = get_winner(last_round, last_round.cards[starting_player].suit, trump);
             takes[starting_player]++;
         }
+        game_over(last_round);
         update_results(bets, takes, total_scores);
     }
 }
