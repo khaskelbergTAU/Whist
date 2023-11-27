@@ -168,7 +168,15 @@ size_t get_winner(round_t round, suit_e starting_suit, suit_e trump) {
 void update_results(size_t bets[4], size_t takes[4], int total_scores[4]) {
     for(int i = 0; i < 4; i++) {
         if(bets[i] == takes[i]) {
-            total_scores[i] += 10 + bets[i] * bets[i];
+            if(bets[i] == 0) {
+                if(bets[0] + bets[1] + bets[2] + bets[3] < 13) {
+                    total_scores[i] += 50;
+                } else {
+                    total_scores[i] += 25;
+                }
+            } else {
+                total_scores[i] += 10 + bets[i] * bets[i];
+            }
         } else {
             total_scores[i] -= 10 * ABS(((int) bets[i]) - ((int) takes[i]));
         }

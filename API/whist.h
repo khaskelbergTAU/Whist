@@ -18,6 +18,7 @@ typedef struct round {
 } round_t, bets_t;
 
 const bet_t BET_PASS = {NONE, 0};
+const bet_t BET_NOT_PLAYED = {CLUBS, 0};
 
 /* to be defined by player: */
 bet_t place_initial_bet(size_t player_position, card_t my_hand[13], bets_t previous_bets);
