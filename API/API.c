@@ -4,6 +4,7 @@
 
 const int MAX_BET = 13;
 const int MIN_BET = 4;
+const bet_t BET_PASS = {NONE, 0};
 
 typedef struct {
 	size_t player_position;
@@ -12,7 +13,8 @@ typedef struct {
 } init_bets_args_t;
 
 typedef struct {
-	bets_t initial_bets;
+	suit_e trump;
+	size_t highest_bidder;
 	size_t final_bets[4];
 } final_bets_args_t;
 
@@ -49,7 +51,8 @@ void final_bets_api() {
 		exit(-1);
 	}
 	result = place_final_bet(
-			args.initial_bets,
+			args.trump,
+			args.highest_bidder,
 			args.final_bets);
 	if(fwrite(&result, sizeof(result), 1, stdout) != 1) {
 		fprintf(stderr, "Error: writing final bet result\n");
@@ -88,12 +91,14 @@ void game_over_api() {
 }
 
 int main(int argc, char **argv) {
+	fprintf(stderr, "aaaa");
 	char op;
 	while(1) {
 		if(fread(&op, 1, 1, stdin) != 1) {
 			fprintf(stderr, "Error: reading the operation code\n");
 			exit(-1);
 		}
+		fprintf(stderr, "aaaazzzz%c", op);
 		switch(op) {
 			case 'i':
 				init_bets_api();

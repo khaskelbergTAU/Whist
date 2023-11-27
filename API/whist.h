@@ -1,5 +1,6 @@
 #ifndef WHIST_H
 #define WHIST_H
+#include <stddef.h>
 typedef enum suit {
 	NONE,
 	HEARTS,
@@ -18,12 +19,12 @@ typedef struct round {
 	card_t cards[4];
 } round_t, bets_t;
 
-const bet_t BET_PASS = {NONE, 0};
+const bet_t BET_PASS;
 
 /* to be defined by player: */
 bet_t place_initial_bet(size_t player_position, card_t my_hand[13], bets_t previous_bets);
 
-size_t place_final_bet(bets_t initial_bets, size_t final_bets[4]);
+size_t place_final_bet(suit_e trump, size_t highest_bidder, size_t final_bets[4]);
 
 card_t play_card(round_t previous_round, round_t current_round);
 
