@@ -27,12 +27,15 @@ size_t place_final_bet(suit_e trump, size_t highest_bidder, size_t final_bets[4]
 }
 
 card_t play_card_phase(round_t previous_round, round_t current_round) {
-    suit_e opening_suit;
+    suit_e opening_suit = NONE;
     for(int i = 0; i < 3; i++) {
         if(cards_equal(current_round.cards[i], BET_PASS) && !cards_equal(current_round.cards[i + 1], BET_PASS)) {
             opening_suit = current_round.cards[i + 1].suit;
             break;
         }
+    }
+    if(opening_suit == NONE) {
+        return 4;
     }
     card_t min_card = {NONE, 15};
     for(int i = 0; i < 13; i++) {
