@@ -1,31 +1,37 @@
 package il.arazim.plugins
 
+import il.arazim.toPath
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
-import io.ktor.util.*
+import java.nio.file.Path
+import java.security.MessageDigest
+import kotlin.text.Charsets.UTF_8
 
 fun Application.configureSecurity() {
     authentication {
-        val myRealm = "MyRealm"
-        val usersInMyRealmToHA1: Map<String, ByteArray> = mapOf(
-            // pass="test", HA1=MD5("test:MyRealm:pass")="fb12475e62dedc5c2744d98eb73b8877"
-            "test" to hex("fb12475e62dedc5c2744d98eb73b8877")
-        )
+        val userRealm = "user-access"
+        val userTable: Map<String, ByteArray> = mapOf(
+            "group1" to "test1",
+            "group2" to "test2",
+            "group3" to "test3",
+            "group4" to "test4",
+        ).mapValues { (user, password) ->
+            MessageDigest.getInstance("MD5").digest("$user:$userRealm:$password".toByteArray(UTF_8))
+        }
 
-        digest("myDigestAuth") {
-            digestProvider { userName, realm ->
-                usersInMyRealmToHA1[userName]
+        digest("user-auth") {
+            realm = userRealm
+            digestProvider { userName, _ ->
+                userTable[userName]
+            }
+            validate { credentials ->
+                GroupPrincipal(credentials.userName)
             }
         }
     }
-    routing {
-        authenticate("myDigestAuth") {
-            get("/protected/route/digest") {
-                val principal = call.principal<UserIdPrincipal>()!!
-                call.respondText("Hello ${principal.name}")
-            }
-        }
-    }
+}
+
+data class GroupPrincipal(val name: String) : Principal {
+    val botsDir: Path
+        get() = "bots/$name/".toPath()
 }
