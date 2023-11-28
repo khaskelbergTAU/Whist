@@ -28,9 +28,9 @@ size_t place_final_bet(suit_e trump, size_t highest_bidder, size_t final_bets[4]
 
 card_t play_card_phase(round_t previous_round, round_t current_round) {
     suit_e opening_suit = NONE;
-    for(int i = 0; i < 3; i++) {
-        if(cards_equal(current_round.cards[i], BET_PASS) && !cards_equal(current_round.cards[i + 1], BET_PASS)) {
-            opening_suit = current_round.cards[i + 1].suit;
+    for(int i = 0; i < 4; i++) {
+        if(cards_equal(current_round.cards[i], BET_PASS) && !cards_equal(current_round.cards[(i + 1) % 4], BET_PASS)) {
+            opening_suit = current_round.cards[(i + 1) % 4].suit;
             break;
         }
     }
