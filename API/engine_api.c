@@ -39,6 +39,7 @@ FILE *player_err_fp[4];
 pid_t player_pids[4];
 
 const char *player_execs[5];
+const char *player_logfiles[5];
 
 int read_with_timeout(int fd, void *res_buf, int read_sz, int timeout) {
 	clock_t end_time, cur_time;
@@ -65,12 +66,7 @@ int read_with_timeout(int fd, void *res_buf, int read_sz, int timeout) {
 void set_exec(size_t player_id, char *name, char *logfile)
 {
 	player_execs[player_id] = name;
-	player_err_fd[player_id] = open(logfile, O_RDWR);
-	if (player_err_fd[player_id] == -1)
-	{
-		perror("open");
-		exit(1);
-	}
+	player_logfiles[player_id] = logfile;
 }
 
 void replace_with_random(size_t player_id) {
@@ -96,6 +92,11 @@ void set_player(size_t player_id, size_t exec_id) {
 		assert(close(stdin_fd[1]) == 0);
 		assert(close(stdout_fd[0]) == 0);
 		assert(close(stdout_fd[1]) == 0);
+		if ((player_err_fd[player_id] = open(player_logfiles[player_id], O_WRONLY | O_CREAT | O_APPEND)) == -1)
+		{
+			perror("open logfile");
+			exit(1);
+		}
 		assert(dup2(player_err_fd[player_id], 2) != -1);
 		assert(close(player_err_fd[player_id]) == 0);
 		execl(player_execs[exec_id], player_execs[exec_id], (char *)NULL);
