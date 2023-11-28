@@ -1,4 +1,4 @@
-package il.arazim.plugins
+package il.arazim.user.plugins
 
 import il.arazim.toPath
 import io.ktor.server.application.*
@@ -33,5 +33,5 @@ fun Application.configureSecurity() {
 
 data class GroupPrincipal(val name: String) : Principal {
     val botsDir: Path
-        get() = "bots/$name/".toPath()
+        get() = "./server_files/bots/$name/".toPath()
 }

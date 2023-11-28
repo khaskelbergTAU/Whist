@@ -1,4 +1,4 @@
-package il.arazim.plugins
+package il.arazim.user.plugins
 
 import io.ktor.server.application.*
 import io.ktor.server.plugins.defaultheaders.*
