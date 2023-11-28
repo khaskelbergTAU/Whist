@@ -1,9 +1,16 @@
 #ifndef _API_ENGINE_API_H
 #define _API_ENGINE_API_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include <sys/types.h>
 #include <stdio.h>
 
 #define RANDOM_PLAYER_ID 4
+
+extern const bet_t INVALID_BET = {-1, -1};
+extern const card_t INVALID_CARD = {-1, -1};
+extern const size_t INVALID_FINAL_BET = -1;
 
 typedef enum suit {
 	NONE,
@@ -47,7 +54,6 @@ void clear_player(size_t player_id);
 void replace_player(size_t player_id, size_t exec_id);
 void set_player(size_t player_id, size_t exec_id);
 void set_exec(size_t player_id, char *args, char *logfile);
-
 bet_t place_initial_bet(size_t player_id, size_t player_position, card_t my_hand[13], bets_t previous_bets);
 
 size_t place_final_bet(size_t player_id, suit_e trump, size_t highest_bidder, size_t final_bets[4]);
@@ -55,4 +61,7 @@ size_t place_final_bet(size_t player_id, suit_e trump, size_t highest_bidder, si
 card_t play_card(size_t player_id, round_t previous_round, round_t current_round);
 
 void game_over(size_t player_id, round_t final_round);
+#ifdef __cplusplus
+}
+#endif
 #endif /* _API_ENGINE_API_H */

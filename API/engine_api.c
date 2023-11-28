@@ -6,6 +6,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/fcntl.h>
+#include <sys/time.h>
+#include <time.h>
+#include <sys/wait.h>
+#include <poll.h>
+
 #include "engine_api.h"
 
 const char INITIAL_BET_OP = 'i';
@@ -18,6 +23,11 @@ const bet_t INVALID_BET = {-1, -1};
 const card_t INVALID_CARD = {-1, -1};
 const size_t INVALID_FINAL_BET = -1;
 
+const int INITIAL_BET_TIMEOUT = 35000;
+const int FINAL_BET_TIMEOUT = 12000;
+const int PLAY_CARD_TIMEOUT = 10000;
+const int GAME_OVER_TIMEOUT = 5000;
+
 int player_in_fd[4];
 int player_out_fd[4];
 int player_err_fd[4];
@@ -29,6 +39,28 @@ FILE *player_err_fp[4];
 pid_t player_pids[4];
 
 const char *player_execs[5];
+
+int read_with_timeout(int fd, void *res_buf, int read_sz, int timeout) {
+	clock_t end_time, cur_time;
+	struct pollfd pollfd[1];
+	int amt_read;
+	int poll_res;
+	int read_res;
+	nfds_t nfds = 1;
+	pollfd[0].fd = fd;
+	pollfd[0].events = POLLIN;
+	cur_time = clock();
+	end_time = cur_time + timeout;
+	while(amt_read != read_sz && end_time - cur_time >= 1000) {
+		poll_res = poll(pollfd, nfds, (end_time - cur_time) / 1000);
+		if(poll_res < 0) return -1;
+		if(poll_res == 0) continue;
+		read_res = read(fd, ((char *)res_buf) + amt_read, read_sz - amt_read);
+		if(read_res < 0) return -1;
+		amt_read += read_res;
+	}
+	return amt_read;
+}
 
 void set_exec(size_t player_id, char *name, char *logfile)
 {
@@ -99,7 +131,7 @@ bet_t place_initial_bet(size_t player_id, size_t player_position, card_t my_hand
 	if(write(player_in_fd[player_id], &args, sizeof(args)) != sizeof(args)) {
 		return INVALID_BET;
 	}
-	if(read(player_out_fd[player_id], &res, sizeof(res)) != sizeof(res)) {
+	if(read_with_timeout(player_out_fd[player_id], &res, sizeof(res), INITIAL_BET_TIMEOUT) != sizeof(res)) {
 		return INVALID_BET;
 	}
 	return res;
@@ -117,7 +149,7 @@ size_t place_final_bet(size_t player_id, suit_e trump, size_t highest_bidder, si
 	if(write(player_in_fd[player_id], &args, sizeof(args)) != sizeof(args)) {
 		return INVALID_FINAL_BET;
 	}
-	if(read(player_out_fd[player_id], &res, sizeof(res)) != sizeof(res)) {
+	if(read_with_timeout(player_out_fd[player_id], &res, sizeof(res), FINAL_BET_TIMEOUT) != sizeof(res)) {
 		return INVALID_FINAL_BET;
 	}
 	return res;
@@ -128,13 +160,13 @@ card_t play_card(size_t player_id, round_t previous_round, round_t current_round
 	card_t res;
 	args.previous_round = previous_round;
 	args.current_round = current_round;
-	if(fwrite(&PLAY_CARD_OP, sizeof(char), 1, player_in_fp[player_id]) != 1) {
+	if(write(player_in_fd[player_id], &PLAY_CARD_OP, sizeof(char)) != sizeof(char)) {
 		return INVALID_CARD;
 	}
-	if(fwrite(&args, sizeof(args), 1, player_in_fp[player_id]) != 1) {
+	if(write(player_in_fd[player_id], &args, sizeof(args)) != sizeof(args)) {
 		return INVALID_CARD;
 	}
-	if(fread(&res, sizeof(res), 1, player_out_fp[player_id]) != 1) {
+	if(read_with_timeout(player_out_fd[player_id], &res, sizeof(res), PLAY_CARD_TIMEOUT) != sizeof(res)) {
 		return INVALID_CARD;
 	}
 	return res;
@@ -144,13 +176,13 @@ void game_over(size_t player_id, round_t final_round) {
 	game_over_args_t args;
 	int res;
 	args.final_round = final_round;
-	if(fwrite(&GAME_OVER_OP, sizeof(char), 1, player_in_fp[player_id]) != 1) {
+	if(write(player_in_fd[player_id], &GAME_OVER_OP, sizeof(char)) != 1) {
 		return;
 	}
-	if(fwrite(&args, sizeof(args), 1, player_in_fp[player_id]) != 1) {
+	if(write(player_in_fd[player_id], &args, sizeof(args)) != 1) {
 		return;
 	}
-	if(fread(&res, sizeof(res), 1, player_out_fp[player_id]) != 1) {
+	if(read_with_timeout(player_out_fd[player_id], &res, sizeof(res), GAME_OVER_TIMEOUT) != 1) {
 		return;
 	}
 }

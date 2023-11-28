@@ -1,6 +1,6 @@
 #include "engine_api.h"
 int main(int argc, char ** argv) {
-	set_exec_name(0, argv[1]);
+	set_exec(0, argv[1], "idkman");
 	set_player(0, 0);
 	size_t test_val = 100;
 	size_t idk[4] = {1, 2, 3, 4};
