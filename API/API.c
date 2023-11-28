@@ -41,6 +41,7 @@ void init_bets_api() {
 		fprintf(stderr, "Error: writing initial bet result\n");
 		exit(-1);
 	}
+	fflush(stdout);
 }
 
 void final_bets_api() {
@@ -75,6 +76,7 @@ void play_card_api() {
 		fprintf(stderr, "Error: writing play card result\n");
 		exit(-1);
 	}
+	fflush(stdout);
 }
 
 void game_over_api() {
@@ -89,6 +91,7 @@ void game_over_api() {
 		fprintf(stderr, "Error: writing play card result\n");
 		exit(-1);
 	}
+	fflush(stdout);
 }
 
 int main(int argc, char **argv)
