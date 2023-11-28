@@ -146,7 +146,7 @@ std::pair<bet_t, size_t> main_bets(card_t cards[4][13], int player_invalid[4]) {
     }
     while(last_changed < 4) {
         bet_t bet = place_initial_bet(player, player, cards[player], bets);
-        if(compare_bets(bet, INVALID_BET) == 0 || player_invalid[player] || (compare_bets(bet, BET_PASS) != 0 && (bet.number < 4 || bet.number > 13 || compare_bets(bet, best_bet) <= 0))) {
+        if(bet > 4 || compare_bets(bet, INVALID_BET) == 0 || player_invalid[player] || (compare_bets(bet, BET_PASS) != 0 && (bet.number < 4 || bet.number > 13 || compare_bets(bet, best_bet) <= 0))) {
             player_invalid[player] = 1;
             if(compare_bets(best_bet, {CLUBS, 0}) == 0) {
                 bet = {CLUBS, 4};
@@ -194,7 +194,7 @@ round_t play_round(card_t hands[4][13], size_t starting_player, round_t last_rou
         if(player == 0) {
             starting_suit = played_card.suit;
         }
-        if((compare_cards(played_card, INVALID_CARD, NONE, NONE) == 0) ||  player_invalid || !legal_play(hands[(starting_player + player) % 4], played_card, starting_suit, trump)) {
+        if((compare_cards(played_card, INVALID_CARD, NONE, NONE) == 0) || player_invalid[(starting_player + player) % 4] || !legal_play(hands[(starting_player + player) % 4], played_card, starting_suit, trump)) {
             player_invalid[(starting_player + player) % 4] = 1;
             if(player == 0) {
                 starting_suit = NONE;
