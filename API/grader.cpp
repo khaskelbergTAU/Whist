@@ -146,7 +146,7 @@ std::pair<bet_t, size_t> main_bets(card_t cards[4][13], int player_invalid[4]) {
     }
     while(last_changed < 4) {
         bet_t bet = place_initial_bet(player, player, cards[player], bets);
-        if(player_invalid[player] || (compare_bets(bet, BET_PASS) != 0 && (bet.number < 4 || bet.number > 13 || compare_bets(bet, best_bet) <= 0))) {
+        if(compare_bets(bet, INVALID_BET) == 0 || player_invalid[player] || (compare_bets(bet, BET_PASS) != 0 && (bet.number < 4 || bet.number > 13 || compare_bets(bet, best_bet) <= 0))) {
             player_invalid[player] = 1;
             if(compare_bets(best_bet, {CLUBS, 0}) == 0) {
                 bet = {CLUBS, 4};
@@ -171,7 +171,7 @@ void final_bets(bet_t highest_bet, size_t highest_bidder, size_t final_bets[4], 
     }
     for(int player = 0; player < 4; player++) {
         size_t final_bet = place_final_bet((highest_bidder + player) % 4, highest_bet.suit, highest_bidder, final_bets);
-        if(player_invalid[(highest_bidder + player) % 4] || final_bet > 13 || (player == 0 && final_bet < highest_bet.number) || (player == 3 && final_bets[0] + final_bets[1] + final_bets[2] + final_bets[3] + final_bet == 13)) {
+        if(final_bet == INVALID_FINAL_BET || player_invalid[(highest_bidder + player) % 4] || final_bet > 13 || (player == 0 && final_bet < highest_bet.number) || (player == 3 && final_bets[0] + final_bets[1] + final_bets[2] + final_bets[3] + final_bet == 13)) {
             player_invalid[(highest_bidder + player) % 4] = 1;
             if(final_bets[0] + final_bets[1] + final_bets[2] + final_bets[3] + final_bet == 12) {
                 final_bet = 2;
@@ -194,7 +194,7 @@ round_t play_round(card_t hands[4][13], size_t starting_player, round_t last_rou
         if(player == 0) {
             starting_suit = played_card.suit;
         }
-        if(player_invalid || !legal_play(hands[(starting_player + player) % 4], played_card, starting_suit, trump)) {
+        if((compare_cards(played_card, INVALID_CARD, NONE, NONE) == 0) ||  player_invalid || !legal_play(hands[(starting_player + player) % 4], played_card, starting_suit, trump)) {
             player_invalid[(starting_player + player) % 4] = 1;
             if(player == 0) {
                 starting_suit = NONE;
@@ -273,5 +273,8 @@ int main(int argc, char * argv[]) {
             game_over(i, last_round);
         }
         update_results(bets, takes, total_scores, player_invalid);
+    }
+    for(int i = 0; i < 4; i++) {
+        clear_player(i);
     }
 }
