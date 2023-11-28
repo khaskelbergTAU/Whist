@@ -42,6 +42,7 @@ void init_bets_api() {
 		exit(-1);
 	}
 	fflush(stdout);
+	fprintf(stderr, "reached fwrite()\n");
 }
 
 void final_bets_api() {

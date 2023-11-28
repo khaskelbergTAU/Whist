@@ -8,10 +8,6 @@ extern "C" {
 
 #define RANDOM_PLAYER_ID 4
 
-extern const bet_t INVALID_BET = {-1, -1};
-extern const card_t INVALID_CARD = {-1, -1};
-extern const size_t INVALID_FINAL_BET = -1;
-
 typedef enum suit {
 	NONE,
 	HEARTS,
@@ -48,6 +44,10 @@ typedef struct {
 typedef struct {
 	round_t final_round;
 } game_over_args_t;
+
+extern const bet_t INVALID_BET;
+extern const card_t INVALID_CARD;
+extern const size_t INVALID_FINAL_BET;
 
 void replace_with_random(size_t player_id);
 void clear_player(size_t player_id);

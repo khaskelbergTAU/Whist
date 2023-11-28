@@ -23,9 +23,9 @@ const bet_t INVALID_BET = {-1, -1};
 const card_t INVALID_CARD = {-1, -1};
 const size_t INVALID_FINAL_BET = -1;
 
-const int INITIAL_BET_TIMEOUT = 35000;
-const int FINAL_BET_TIMEOUT = 12000;
-const int PLAY_CARD_TIMEOUT = 10000;
+const int INITIAL_BET_TIMEOUT = 3500;
+const int FINAL_BET_TIMEOUT = 1200;
+const int PLAY_CARD_TIMEOUT = 1000;
 const int GAME_OVER_TIMEOUT = 5000;
 
 int player_in_fd[4];
@@ -41,20 +41,30 @@ pid_t player_pids[4];
 const char *player_execs[5];
 const char *player_logfiles[5];
 
+long long time_ms() {
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	return (((long long)tv.tv_sec) * 1000) + (tv.tv_usec / 1000);
+}
+
 int read_with_timeout(int fd, void *res_buf, int read_sz, int timeout) {
-	clock_t end_time, cur_time;
+	long long cur_time, end_time;
 	struct pollfd pollfd[1];
-	int amt_read;
+	int amt_read = 0;
 	int poll_res;
 	int read_res;
 	nfds_t nfds = 1;
 	pollfd[0].fd = fd;
 	pollfd[0].events = POLLIN;
-	cur_time = clock();
+	cur_time = time_ms();
 	end_time = cur_time + timeout;
-	while(amt_read != read_sz && end_time - cur_time >= 1000) {
-		poll_res = poll(pollfd, nfds, (end_time - cur_time) / 1000);
+	while(amt_read != read_sz) {
+		cur_time = time_ms();
+		//printf("%ld %ld %ld\n", end_time, cur_time, end_time - cur_time);
+		if(end_time - cur_time < 0) break;
+		poll_res = poll(pollfd, nfds, end_time - cur_time);
 		if(poll_res < 0) return -1;
+		//printf("arrived\n");
 		if(poll_res == 0) continue;
 		read_res = read(fd, ((char *)res_buf) + amt_read, read_sz - amt_read);
 		if(read_res < 0) return -1;
@@ -92,7 +102,7 @@ void set_player(size_t player_id, size_t exec_id) {
 		assert(close(stdin_fd[1]) == 0);
 		assert(close(stdout_fd[0]) == 0);
 		assert(close(stdout_fd[1]) == 0);
-		if ((player_err_fd[player_id] = open(player_logfiles[player_id], O_WRONLY | O_CREAT | O_APPEND)) == -1)
+		if ((player_err_fd[player_id] = open(player_logfiles[player_id], O_WRONLY | O_CREAT | O_APPEND, 0666)) == -1)
 		{
 			perror("open logfile");
 			exit(1);
@@ -124,7 +134,7 @@ bet_t place_initial_bet(size_t player_id, size_t player_position, card_t my_hand
 	init_bets_args_t args;
 	bet_t res;
 	args.player_position = player_position;
-	memcpy(&args.my_hand[0], my_hand, sizeof(card_t) * 13);
+	memcpy(args.my_hand, my_hand, sizeof(card_t) * 13);
 	args.previous_bets = previous_bets;
 	if(write(player_in_fd[player_id], &INITIAL_BET_OP, sizeof(char)) != sizeof(char)) {
 		return INVALID_BET;
@@ -132,7 +142,9 @@ bet_t place_initial_bet(size_t player_id, size_t player_position, card_t my_hand
 	if(write(player_in_fd[player_id], &args, sizeof(args)) != sizeof(args)) {
 		return INVALID_BET;
 	}
-	if(read_with_timeout(player_out_fd[player_id], &res, sizeof(res), INITIAL_BET_TIMEOUT) != sizeof(res)) {
+	int idk;
+	if((idk = read_with_timeout(player_out_fd[player_id], &res, sizeof(res), INITIAL_BET_TIMEOUT)) != sizeof(res)) {
+		printf("%d", idk);
 		return INVALID_BET;
 	}
 	return res;
