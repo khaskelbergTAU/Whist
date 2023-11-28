@@ -1,8 +1,9 @@
-#ifndef ENGINE_API_H
-#define ENGINE_API_H
-#include <signal.h>
+#ifndef _API_ENGINE_API_H
+#define _API_ENGINE_API_H
 #include <sys/types.h>
 #include <stdio.h>
+
+#define RANDOM_PLAYER_ID 4
 
 typedef enum suit {
 	NONE,
@@ -45,7 +46,7 @@ void replace_with_random(size_t player_id);
 void clear_player(size_t player_id);
 void replace_player(size_t player_id, size_t exec_id);
 void set_player(size_t player_id, size_t exec_id);
-void set_exec_name(size_t player_id, char * args);
+void set_exec(size_t player_id, char *args, char *logfile);
 
 bet_t place_initial_bet(size_t player_id, size_t player_position, card_t my_hand[13], bets_t previous_bets);
 
@@ -54,4 +55,4 @@ size_t place_final_bet(size_t player_id, suit_e trump, size_t highest_bidder, si
 card_t play_card(size_t player_id, round_t previous_round, round_t current_round);
 
 void game_over(size_t player_id, round_t final_round);
-#endif
+#endif /* _API_ENGINE_API_H */

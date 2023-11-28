@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/fcntl.h>
 #include "engine_api.h"
 
 const char INITIAL_BET_OP = 'i';
@@ -29,10 +30,15 @@ pid_t player_pids[4];
 
 const char *player_execs[5];
 
-const int RANDOM_PLAYER_ID = 4;
-
-void set_exec_name(size_t player_id, char * name) {
+void set_exec(size_t player_id, char *name, char *logfile)
+{
 	player_execs[player_id] = name;
+	player_err_fd[player_id] = open(logfile, O_RDWR);
+	if (player_err_fd[player_id] == -1)
+	{
+		perror("open");
+		exit(1);
+	}
 }
 
 void replace_with_random(size_t player_id) {
@@ -41,6 +47,7 @@ void replace_with_random(size_t player_id) {
 
 void clear_player(size_t player_id) {
 	kill(player_pids[player_id], SIGKILL);
+	waitpid(player_pids[player_id], NULL, 0);
 }
 
 void set_player(size_t player_id, size_t exec_id) {
@@ -57,7 +64,8 @@ void set_player(size_t player_id, size_t exec_id) {
 		assert(close(stdin_fd[1]) == 0);
 		assert(close(stdout_fd[0]) == 0);
 		assert(close(stdout_fd[1]) == 0);
-		//assert(dup2(player_err_fd[player_id], 2) != -1);
+		assert(dup2(player_err_fd[player_id], 2) != -1);
+		assert(close(player_err_fd[player_id]) == 0);
 		execl(player_execs[exec_id], player_execs[exec_id], (char *)NULL);
 		fprintf(stderr, "execl failed\n");
 		exit(1);
