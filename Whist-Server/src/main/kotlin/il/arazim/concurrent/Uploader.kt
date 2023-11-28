@@ -11,6 +11,7 @@ import kotlinx.coroutines.yield
 import java.io.InputStream
 import java.nio.file.Path
 import kotlin.io.path.*
+import il.arazim.toPath
 
 class Uploader private constructor(private val group: String) {
     private val mutex = Mutex()
@@ -18,10 +19,10 @@ class Uploader private constructor(private val group: String) {
     val latest
         get() = _latest.asStateFlow()
 
-    private val latestPath = getSourceDir(group).resolve("latest")
+//    private val latestPath = getSourceDir(group).resolve("latest")
 
-    private fun getSavedLatest() = getLatest(group).readText(Charsets.UTF_8)
-    private fun saveLatest() = getLatest(group).writeText(latest.value)
+    private fun getSavedLatest() = getLatest(group).readText(Charsets.UTF_8).takeIf { it != "" && getExecutablesDir(group).resolve(it).exists() }
+    private fun saveLatest() = latest.value?.let { getLatest(group).writeText(it, Charsets.UTF_8) }
 
     suspend fun uploadBot(name: String, bytes: InputStream) = withContext(NonCancellable + Dispatchers.IO) {
         val savePath: Path
@@ -29,16 +30,16 @@ class Uploader private constructor(private val group: String) {
         mutex.withLock {
             var resolveOverride = 0
             while (getSourceDir(group).resolve("${name}_$resolveOverride").exists()) resolveOverride++
-            botName = "${name}_$resolveOverride"
-            savePath = getSourceDir(group).resolve(botName)
-            latestPath.deleteIfExists()
-            latestPath.createSymbolicLinkPointingTo(savePath)
+            botName = "${name.toPath().normalize().fileName}_$resolveOverride"
+            savePath = getSourceDir(group).resolve("$botName.c")
+//            latestPath.deleteIfExists()
+//            latestPath.createSymbolicLinkPointingTo(savePath)
         }
         savePath.writeBytes(bytes.readBytes())
 
         val compiler = ProcessBuilder("gcc ${savePath.absolutePathString()} ${getWrapper().absolutePathString()} -o ${getExecutablesDir(group).resolve(botName)}")
-            .redirectOutput(getCompilationLogsDir(group).resolve("$botName-stdout").toFile())
-            .redirectError(getCompilationLogsDir(group).resolve("$botName-stderr").toFile()).start()
+            .redirectOutput(getCompilationLogsDir(group).resolve("$botName-stdout").normalize().toFile())
+            .redirectError(getCompilationLogsDir(group).resolve("$botName-stderr").normalize().toFile()).start()
 
         while (compiler.isAlive) yield()
 

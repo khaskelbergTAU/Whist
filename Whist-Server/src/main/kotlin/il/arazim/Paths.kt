@@ -1,0 +1,17 @@
+package il.arazim.concurrent
+
+import il.arazim.rootDir
+import java.nio.file.Path
+import kotlin.io.path.*
+
+fun getSubmissionDir(group: String): Path = rootDir.resolve("bots/$group/submissions").apply { createDirectories() }
+fun getSourceDir(group: String): Path = getSubmissionDir(group).resolve("source").apply { createDirectories() }
+fun getCompilationLogsDir(group: String): Path = getSubmissionDir(group).resolve("clogs").apply { createDirectories() }
+fun getExecutablesDir(group: String): Path = getSubmissionDir(group).resolve("exec").apply { createDirectories() }
+fun getLatest(group: String): Path = getSubmissionDir(group).resolve("latest.txt").also { if (!it.exists()) it.createFile() }
+
+fun getWrapper() = rootDir.resolve("wrapper.c").readSymbolicLink()
+
+fun getRunDir(): Path = rootDir.resolve("run").apply { createDirectories() }
+fun getRunResults(): Path = getRunDir().resolve("output.txt").also { if (!it.exists()) it.createFile() }
+fun getRunLog(group: String): Path = getRunDir().resolve("$group.log").also { if (!it.exists()) it.createFile() }

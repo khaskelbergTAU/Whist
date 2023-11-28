@@ -1,6 +1,6 @@
 package il.arazim
 
-import il.arazim.plugins.*
+import il.arazim.user.plugins.*
 import io.ktor.server.application.*
 
 fun main(args: Array<String>) {
