@@ -43,6 +43,47 @@ int compare_cards(card_t card1, card_t card2, suit_e starting_suit, suit_e trump
     return 0;
 }
 
+card_t get_random_card(hand_t hand, suit_t starting_suit) {
+    int starting_suit_count = 0;
+    for(int i = 0; i < 13; i++) {
+        if(hand[i].suit == starting_suit) {
+            starting_suit_count++;
+        }
+    }
+    if(starting_suit_count != 0) {
+        srand((unsigned)time(0));
+        int i = rand() % starting_suit_count;
+        int j = 0;
+        while(hand[i].suit != starting_suit) {
+            j++;
+        }
+        for( ; j < i; j++) {
+            while(hand[i].suit != starting_suit) {
+                j++;
+            }
+        }
+        return hand[i];
+    }
+    int cards_left = 0;
+    for(int i = 0; i < 13; i++) {
+        if(compare_cards(hand[i], BET_PASS) != 0) {
+            starting_suit_count++;
+        }
+    }
+    srand((unsigned)time(0));
+    int i = rand() % cards_left;
+    int j = 0;
+    while(compare_cards(hand[i], BET_PASS) == 0) {
+        j++;
+    }
+    for( ; j < i; j++) {
+        while(compare_cards(hand[i], BET_PASS) == 0) {
+            j++;
+        }
+    }
+    return hand[i];
+}
+
 void shuffle_cards(card_t cards[4][13]) {
     card_t all_cards[4 * 13];
     for(int i = 0; i < 4 * 13; i++) {
