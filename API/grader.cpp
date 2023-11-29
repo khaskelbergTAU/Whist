@@ -69,7 +69,6 @@ card_t get_random_card(card_t hand[13], suit_e starting_suit) {
 			}
 		}
 		if(starting_suit_count != 0) {
-			srand((unsigned)time(0));
 			int i = rand() % starting_suit_count;
 			int j = 0;
 			while(1) {
@@ -89,7 +88,6 @@ card_t get_random_card(card_t hand[13], suit_e starting_suit) {
 			cards_left++;
 		}
 	}
-	srand((unsigned)time(0));
 	int i = rand() % cards_left;
 	int j = 0;
 	while(1) {
@@ -109,7 +107,7 @@ void shuffle_cards(card_t cards[4][13]) {
 		all_cards[i].suit = (suit_e) ((i / 13) + 1);
 		all_cards[i].number = 2 + (i % 13);
 	}
-	std::shuffle(all_cards, all_cards + 4 * 13, std::default_random_engine((unsigned)time(0)));
+	std::shuffle(all_cards, all_cards + 4 * 13, std::default_random_engine(rand()));
 	for(int i = 0; i < 4 * 13; i++) {
 		cards[i / 13][i % 13] = all_cards[i];
 	}
@@ -350,6 +348,7 @@ int main(int argc, char * argv[]) {
 	if(argc == 11) {
 		summary_file = fopen(argv[10], "w");
 	}
+    srand((unsigned)time(0));
 	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)
 		perror("signal");
 	for(int i = 0; i < 4; i++) {

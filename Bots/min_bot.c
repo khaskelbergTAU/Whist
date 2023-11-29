@@ -30,13 +30,13 @@ int cards_equal(card_t card1, card_t card2) {
 bet_t place_initial_bet(size_t player_position, card_t my_hand[13], bets_t previous_bets) {
     memcpy(hand, my_hand, sizeof(card_t) * 13);
     position = player_position;
-    bet_t wanted_bet;
+    bet_t wanted_bet = {NONE, 0};
     size_t suit_count[4] = {0};
     for(int i = 0; i < 13; i++) {
         suit_count[hand[i].suit - 1]++;
         wanted_bet.number += (hand[i].number > 4 ? hand[i].number - 4 : 0);
     }
-    wanted_bet.number = (wanted_bet.number * 3 / 4);
+    wanted_bet.number = (9 * wanted_bet.number) / 10;
     wanted_bet.number /= 10;
     wanted_bet_number = wanted_bet.number;
     if(wanted_bet.number < 4) {
@@ -58,7 +58,7 @@ bet_t place_initial_bet(size_t player_position, card_t my_hand[13], bets_t previ
 
 size_t place_final_bet(suit_e trump, size_t highest_bidder, size_t final_bets[4]) {
     if(final_bets[0] + final_bets[1] + final_bets[2] + final_bets[3] == 13 - wanted_bet_number) {
-        return wanted_bet_number - 1;
+        return wanted_bet_number + 1;
     }
     return wanted_bet_number;
 }
