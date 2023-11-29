@@ -16,7 +16,6 @@ import io.ktor.server.routing.*
 import java.io.InputStream
 import kotlin.io.path.exists
 import kotlin.io.path.readText
-import kotlin.io.path.walk
 import kotlin.io.path.writeText
 
 fun Application.configureUserRouting() {
@@ -101,6 +100,25 @@ fun Application.configureUserRouting() {
                     }
 
                     call.respondText(results)
+                }
+                get("/log/{index}") {
+                    val group = call.principal<GroupPrincipal>()?.name
+                    if (group == null) {
+                        call.respond(UnauthorizedResponse())
+                        return@get
+                    }
+
+                    val index = call.parameters["index"]?.toIntOrNull()?.takeIf { it in 1..4 }
+                        ?: throw ParameterException("index", "Index missing or invalid.. (Index should be from 1 to 4)")
+
+                    val log =
+                        getRunDir(group).resolve("$index.txt").takeIf { it.exists() }?.readText(Charsets.UTF_8)
+
+                    if (log == null) {
+                        throw Exception("There has been no runs")
+                    }
+
+                    call.respondText(log)
                 }
                 get("/bots") {
                     val group = call.principal<GroupPrincipal>()?.name
