@@ -21,30 +21,34 @@ class Uploader private constructor(private val group: String) {
 
 //    private val latestPath = getSourceDir(group).resolve("latest")
 
-    private fun getSavedLatest() = getLatest(group).readText(Charsets.UTF_8).takeIf { it != "" && getExecutablesDir(group).resolve(it).exists() }
-    private fun saveLatest() = latest.value?.let { getLatest(group).writeText(it, Charsets.UTF_8) }
+    private fun getSavedLatest() = il.arazim.il.arazim.getLatest(group)
+
+        .readText(Charsets.UTF_8).takeIf { it != "" && il.arazim.il.arazim.getExecutablesDir(group).resolve(it).exists() }
+    private fun saveLatest() = latest.value?.let { il.arazim.il.arazim.getLatest(group).writeText(it, Charsets.UTF_8) }
 
     suspend fun uploadBot(name: String, bytes: InputStream) = withContext(NonCancellable + Dispatchers.IO) {
         val savePath: Path
         val botName: String
         mutex.withLock {
             var resolveOverride = 0
-            while (getSourceDir(group).resolve("${name}_$resolveOverride").exists()) resolveOverride++
+            while (il.arazim.il.arazim.getSourceDir(group).resolve("${name}_$resolveOverride").exists()) resolveOverride++
             botName = "${name.toPath().normalize().fileName}_$resolveOverride"
-            savePath = getSourceDir(group).resolve("$botName.c")
+            savePath = il.arazim.il.arazim.getSourceDir(group).resolve("$botName.c")
 //            latestPath.deleteIfExists()
 //            latestPath.createSymbolicLinkPointingTo(savePath)
         }
         savePath.writeBytes(bytes.readBytes())
 
-        val compiler = ProcessBuilder("gcc ${savePath.absolutePathString()} ${getWrapper().absolutePathString()} -o ${getExecutablesDir(group).resolve(botName)}")
-            .redirectOutput(getCompilationLogsDir(group).resolve("$botName-stdout").normalize().toFile())
-            .redirectError(getCompilationLogsDir(group).resolve("$botName-stderr").normalize().toFile()).start()
+        val compiler = ProcessBuilder("gcc ${savePath.absolutePathString()} ${
+            il.arazim.
+            il.arazim.getWrapper().absolutePathString()} -o ${il.arazim.il.arazim.getExecutablesDir(group).resolve(botName)}")
+            .redirectOutput(il.arazim.il.arazim.getCompilationLogsDir(group).resolve("$botName-stdout").normalize().toFile())
+            .redirectError(il.arazim.il.arazim.getCompilationLogsDir(group).resolve("$botName-stderr").normalize().toFile()).start()
 
         while (compiler.isAlive) yield()
 
         if (compiler.exitValue() != 0) {
-            getExecutablesDir(group).resolve("$botName.failed").createFile()
+            il.arazim.il.arazim.getExecutablesDir(group).resolve("$botName.failed").createFile()
         }
     }
 

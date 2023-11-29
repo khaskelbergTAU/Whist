@@ -7,7 +7,7 @@ import java.nio.file.Path
 import java.security.MessageDigest
 import kotlin.text.Charsets.UTF_8
 
-fun Application.configureSecurity() {
+fun Application.configuerAuthentication() {
     authentication {
         val userRealm = "user-access"
         val userTable: Map<String, ByteArray> = mapOf(

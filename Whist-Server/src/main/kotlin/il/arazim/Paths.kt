@@ -1,6 +1,5 @@
-package il.arazim.concurrent
+package il.arazim
 
-import il.arazim.rootDir
 import java.nio.file.Path
 import kotlin.io.path.*
 
