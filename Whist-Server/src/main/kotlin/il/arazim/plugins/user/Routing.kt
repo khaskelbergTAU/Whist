@@ -150,14 +150,14 @@ fun Application.configureUserRouting() {
 
                     call.respondText(
                         """
-                    {
-                    "unselected": [${
+                        {
+                        "unselected": [${
                             allCompilations.filterNot { it == selected }
                                 .joinToString(separator = "\", \"", prefix = "\"", postfix = "\"")
                         }],
-                    "selected": "$selected"
-                    }
-                    """.trimIndent()
+                        "selected": "$selected"
+                        }
+                        """.trimIndent()
                     )
                 }
                 post("/select") {
@@ -174,7 +174,7 @@ fun Application.configureUserRouting() {
                         call.respond(
                             status = HttpStatusCode.BadRequest, """
                             Bot doesn't exist
-                        """.trimIndent()
+                            """.trimIndent()
                         )
                     }
 
@@ -182,33 +182,35 @@ fun Application.configureUserRouting() {
 
                     call.respondOk()
                 }
+                post("/start") {
+                    val group = call.principal<GroupPrincipal>()?.name
+                    if (group == null) {
+                        call.respond(UnauthorizedResponse())
+                        return@post
+                    }
+
+                    val bots =
+                        call.request.queryParameters["bots"]?.split(",")?.map(String::trim)?.takeIf { it.size == 4 }
+                            ?: throw ParameterException("bots", "Bot list missing or invalid")
+
+                    val allBots = getAllBots(group)
+
+                    bots.find {
+                        it !in allBots
+                    }?.let { throw ParameterException("bots", "Bot doesn't exist: $it") }
+
+                    val rounds = call.request.queryParameters["run_count"]?.toIntOrNull()
+                        ?: throw ParameterException("run_count", "Invalid run count")
+
+                    Runner.getInstance(group).newRun(bots, rounds)
+
+                    call.respondOk()
+                }
             }
             post("/logout") {
                 call.respondRedirect("/")
             }
-            post("/start") {
-                val group = call.principal<GroupPrincipal>()?.name
-                if (group == null) {
-                    call.respond(UnauthorizedResponse())
-                    return@post
-                }
 
-                val bots = call.request.queryParameters["bots"]?.split(",")?.map(String::trim)?.takeIf { it.size == 4 }
-                    ?: throw ParameterException("bots", "Bot list missing or invalid")
-
-                val allBots = getAllBots(group)
-
-                bots.find {
-                    it !in allBots
-                }?.let { throw ParameterException("bots", "Bot doesn't exist: $it") }
-
-                val rounds = call.request.queryParameters["run_count"]?.toIntOrNull()
-                    ?: throw ParameterException("run_count", "Invalid run count")
-
-                Runner.getInstance(group).newRun(bots, rounds)
-
-                call.respondOk()
-            }
         }
     }
 }
