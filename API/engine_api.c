@@ -18,10 +18,10 @@ const char FINAL_BET_OP = 'f';
 const char PLAY_CARD_OP = 'p';
 const char GAME_OVER_OP = 'o';
 
-const int INITIAL_BET_TIMEOUT_MS = 3500;
-const int FINAL_BET_TIMEOUT_MS = 1200;
-const int PLAY_CARD_TIMEOUT_MS = 1000;
-const int GAME_OVER_TIMEOUT_MS = 500;
+const int INITIAL_BET_TIMEOUT_MS = 35;
+const int FINAL_BET_TIMEOUT_MS = 12;
+const int PLAY_CARD_TIMEOUT_MS = 10;
+const int GAME_OVER_TIMEOUT_MS = 5;
 
 const bet_t BET_PASS = {NONE, 0};
 const bet_t BET_NOT_PLAYED = {CLUBS, 0};
@@ -42,9 +42,13 @@ const char *player_logfiles[5];
 
 long long time_ms(char *schedstat_name) {
 	FILE *schedstat = fopen(schedstat_name, "r");
+	if(schedstat == NULL) {
+		fprintf(stderr, "failed to open schedstat file\n");
+		exit(1);
+	}
 	long long res;
 	fscanf(schedstat, "%lld", &res);
-	res *= 1000000;
+	res /= 1000000;
 	fclose(schedstat);
 	return res;
 	/*struct timeval tv;
@@ -139,14 +143,15 @@ bet_t place_initial_bet_api(size_t player_id, size_t player_position, card_t my_
 	memcpy(args.my_hand, my_hand, sizeof(card_t) * 13);
 	args.previous_bets = previous_bets;
 	if(write(player_in_fd[player_id], &INITIAL_BET_OP, sizeof(char)) != sizeof(char)) {
+		fprintf(stderr, "first write failed in initial bet\n");
 		return INVALID_BET;
 	}
 	if(write(player_in_fd[player_id], &args, sizeof(args)) != sizeof(args)) {
+		fprintf(stderr, "second write failed in initial bet\n");
 		return INVALID_BET;
 	}
-	int idk;
-	if((idk = read_with_timeout(player_out_fd[player_id], &res, sizeof(res), INITIAL_BET_TIMEOUT_MS, player_id)) != sizeof(res)) {
-		printf("%d", idk);
+	if(read_with_timeout(player_out_fd[player_id], &res, sizeof(res), INITIAL_BET_TIMEOUT_MS, player_id) != sizeof(res)) {
+		fprintf(stderr, "read failed in initial bet\n");
 		return INVALID_BET;
 	}
 	return res;
@@ -159,12 +164,15 @@ size_t place_final_bet_api(size_t player_id, suit_e trump, size_t highest_bidder
 	args.highest_bidder = highest_bidder;
 	memcpy(args.final_bets, final_bets, sizeof(size_t) * 4);
 	if(write(player_in_fd[player_id], &FINAL_BET_OP, sizeof(char)) != sizeof(char)) {
+		fprintf(stderr, "first write failed in final bet\n");
 		return INVALID_FINAL_BET;
 	}
 	if(write(player_in_fd[player_id], &args, sizeof(args)) != sizeof(args)) {
+		fprintf(stderr, "second write failed in final bet\n");
 		return INVALID_FINAL_BET;
 	}
 	if(read_with_timeout(player_out_fd[player_id], &res, sizeof(res), FINAL_BET_TIMEOUT_MS, player_id) != sizeof(res)) {
+		fprintf(stderr, "read failed in final bet\n");
 		return INVALID_FINAL_BET;
 	}
 	return res;
@@ -176,12 +184,15 @@ card_t play_card_api(size_t player_id, round_t previous_round, round_t current_r
 	args.previous_round = previous_round;
 	args.current_round = current_round;
 	if(write(player_in_fd[player_id], &PLAY_CARD_OP, sizeof(char)) != sizeof(char)) {
+		fprintf(stderr, "first write failed in play card\n");
 		return INVALID_CARD;
 	}
 	if(write(player_in_fd[player_id], &args, sizeof(args)) != sizeof(args)) {
+		fprintf(stderr, "second write failed in play card\n");
 		return INVALID_CARD;
 	}
 	if(read_with_timeout(player_out_fd[player_id], &res, sizeof(res), PLAY_CARD_TIMEOUT_MS, player_id) != sizeof(res)) {
+		fprintf(stderr, "read failed in play card\n");
 		return INVALID_CARD;
 	}
 	return res;
