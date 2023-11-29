@@ -62,8 +62,14 @@ API/engine
 API/user
 API/grader
 grader
+log0.txt
 log1.txt
 log2.txt
 log3.txt
 log4.txt
 min_bot
+<<<<<<< HEAD
+=======
+max_bot
+random_bot
+>>>>>>> origin/more_bots

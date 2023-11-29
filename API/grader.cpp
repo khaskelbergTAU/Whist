@@ -93,7 +93,7 @@ void shuffle_cards(card_t cards[4][13]) {
         all_cards[i].suit = (suit_e) ((i / 13) + 1);
         all_cards[i].number = 2 + (i % 13);
     }
-    std::shuffle(all_cards, all_cards + 4 * 13, std::default_random_engine(0));
+    std::shuffle(all_cards, all_cards + 4 * 13, std::default_random_engine((unsigned)time(0)));
     for(int i = 0; i < 4 * 13; i++) {
         cards[i / 13][i % 13] = all_cards[i];
     }
@@ -181,6 +181,7 @@ std::pair<bet_t, size_t> main_bets(card_t cards[4][13], int player_invalid[4]) {
                 clear_player(player);
             }
             player_invalid[player] = 1;
+            fprintf(stderr, "replacing initial bet for player %lu\n", player);
             if(compare_bets(best_bet, {CLUBS, 0}) == 0) {
                 bet = {CLUBS, 4};
             } else {
@@ -220,11 +221,15 @@ void final_bets(bet_t highest_bet, size_t highest_bidder, size_t final_bets[4], 
                 clear_player((highest_bidder + player) % 4);
             }
             player_invalid[(highest_bidder + player) % 4] = 1;
-            if(final_bets[0] + final_bets[1] + final_bets[2] + final_bets[3] + final_bet == 12) {
+            fprintf(stderr, "replacing final bet for player %lu\n", (highest_bidder + player) % 4);
+            if(player == 0) {
+                final_bet = highest_bet.number;
+            } else if(final_bets[0] + final_bets[1] + final_bets[2] + final_bets[3] + final_bet == 12) {
                 final_bet = 2;
             } else {
                 final_bet = 1;
             }
+            clear_player((highest_bidder + player) % 4);
         }
         final_bets[(highest_bidder + player) % 4] = final_bet;
         fprintf(stderr, "Player %lu put final bet %lu\n", (highest_bidder + player) % 4, final_bet);
@@ -259,6 +264,7 @@ round_t play_round(card_t hands[4][13], size_t starting_player, round_t last_rou
                 starting_suit = NONE;
             }
             played_card = get_random_card(hands[(starting_player + player) % 4], starting_suit);
+            fprintf(stderr, "replaced card for player %lu\n", (starting_player + player) % 4);
             if(player == 0) {
                 starting_suit = played_card.suit;
             }
@@ -284,17 +290,22 @@ void update_results(size_t bets[4], size_t takes[4], int total_scores[4], int pl
     for(int i = 0; i < 4; i++) {
         if(player_invalid[i]) {
             total_scores[i] -= 50;
+            fprintf(stderr, "Player %d was invalid\n", i);
         } else if(bets[i] == takes[i]) {
             if(bets[i] == 0) {
                 if(bets[0] + bets[1] + bets[2] + bets[3] < 13) {
+                    fprintf(stderr, "Player %d: +50\n", i);
                     total_scores[i] += 50;
                 } else {
+                    fprintf(stderr, "Player %d: +25\n", i);
                     total_scores[i] += 25;
                 }
             } else {
+                fprintf(stderr, "Player %d: +%ld\n", i, 10 + bets[i] * bets[i]);
                 total_scores[i] += 10 + bets[i] * bets[i];
             }
         } else {
+            fprintf(stderr, "Player %d: -%d\n", i, 10 * ABS(((int) bets[i]) - ((int) takes[i])));
             total_scores[i] -= 10 * ABS(((int) bets[i]) - ((int) takes[i]));
         }
     }
@@ -315,15 +326,23 @@ int main(int argc, char * argv[]) {
         card_t hands[4][13];
         shuffle_cards(hands);
         for(int i = 0; i < 4; i++) {
+            fprintf(stderr, "Player %d's hand:\n", i);
+            for(int j = 0; j < 13; j++) {
+                fprintf(stderr, "%s %lu\n", suit_string(hands[i][j].suit), hands[i][j].number);
+            }
+        }
+        for(int i = 0; i < 4; i++) {
             if(player_invalid[i]) {
                 set_player(i, i);
                 player_invalid[i] = 0;
             }
         }
+        fprintf(stderr, "Starting main bets\n");
         std::pair<bet_t, size_t> bet_data = main_bets(hands, player_invalid);
         suit_e trump = bet_data.first.suit;
         size_t starting_player = bet_data.second;
         size_t bets[4];
+        fprintf(stderr, "Starting final bets\n");
         final_bets(bet_data.first, starting_player, bets, player_invalid);
         round_t last_round;
         for(int i = 0; i < 4; i++) {
@@ -340,6 +359,7 @@ int main(int argc, char * argv[]) {
             game_over_api(i, last_round);
         }
         update_results(bets, takes, total_scores, player_invalid);
+        fprintf(stderr, "Takes: %s: %lu, %s: %lu, %s: %lu, %s: %lu\n", argv[1], takes[0], argv[2], takes[1], argv[3], takes[2], argv[4], takes[3]);
         printf("%s%d,%s%d,%s%d,%s%d\n", argv[1], total_scores[0], argv[2], total_scores[1], argv[3], total_scores[2], argv[4], total_scores[3]);
     }
     for(int i = 0; i < 4; i++) {
