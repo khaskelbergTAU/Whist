@@ -44,29 +44,30 @@ function load_bots()
         let unselected_button = document.getElementById("non-selected-button");
         let selected_button = document.getElementById("selected-button");
         let botlist = document.getElementById("botlist");
-        for(let child in botlist.children)
+        while(botlist.firstChild)
         {
-            botlist.removeChild(child);
+            botlist.removeChild(botlist.firstChild);
         }
-
         if(response["selected"] != "")
         {
             let bot_button = selected_button.cloneNode(true);
             bot_button.classList.remove("hidden");
-            bot_button.innerText = response["selected_bot"];
+            bot_button.innerText = response["selected"];
             bot_button.id = "current_bot";
             botlist.appendChild(bot_button);
         }
-        for(let bot in response["unselected"])
-        {
+        response["unselected"].forEach(bot => {
+            if (bot == "")
+            {
+                return;
+            }
             let bot_button = unselected_button.cloneNode(true);
             bot_button.classList.remove("hidden");
             bot_button.innerText = bot;
             bot_button.id = bot;
             bot_button.onclick = function() { select_bot(bot); };
             botlist.appendChild(bot_button);
-        }
-        document.getElementById("bottext").innerText = response;
+        });
         return response;
     });
    //.then(response => console.log(JSON.stringify(response)));

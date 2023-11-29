@@ -74,7 +74,7 @@
       </nav>
     </div>
     <div
-      class="grid grid-cols-2 h-screen place-items-center"
+      class="grid grid-cols-3 h-screen place-items-center"
       style="background-color: var(--md-sys-color-secondary)"
     >
       <div class="w-full flex justify-center">
@@ -95,10 +95,20 @@
           <div class="flex justify-center w-full">
             <label> Select Bots </label>
           </div>
-          <div id="botlist">
-
-          </div>
+          <div id="botlist"></div>
         </div>
+      </div>
+      <div>
+                
+        <button onclick="start_run()" class="h-10 px-5 text-indigo-100 bg-indigo-700 rounded-lg transition-colors duration-150 focus:shadow-outline hover:bg-indigo-800">Run</button>
+      </div>
+      <div
+        class="w-48 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+      >
+        <div class="flex justify-center w-full">
+          <label> Selected Bots </label>
+        </div>
+        <div id="current_bots"></div>
       </div>
     </div>
   </body>

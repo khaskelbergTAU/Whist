@@ -1,24 +1,57 @@
 function deselect_bot(bot)
 {
-    let bot_button = document.getElementById(bot);
-    let unselected_button = document.getElementById("non-selected-button").cloneNode(true);
-    unselected_button.classList.remove("hidden");
-    unselected_button.innerText = bot;
-    unselected_button.id = bot;
-    unselected_button.onclick = function() { select_bot(bot); };
-    bot_button.replaceWith(unselected_button);
+    let bot_button = document.getElementById(bot + "_selected");
+    bot_button.remove();
 }
 
 
 function select_bot(bot)
 {
-    let button = document.getElementById(bot);
-    let selected_button = document.getElementById("selected-button").cloneNode(true);
-    selected_button.classList.remove("hidden");
-    selected_button.innerText = bot;
-    selected_button.id = bot;
-    selected_button.classList.add("selected");
-    button.replaceWith(selected_button);
+    let button = document.getElementById("non-selected-button").cloneNode(true);
+    button.classList.remove("hidden");
+    button.innerText = bot;
+    button.id = bot + "_selected";
+    button.classList.add("selected");
+    button.onclick = function() { deselect_bot(bot); };
+    document.getElementById("current_bots").appendChild(button);
+}
+
+function start_run()
+{
+    let bots = [];
+    let botlist = document.getElementById("current_bots");
+    botlist.childNodes.forEach(bot => {
+        bots.push(bot.innerText);
+    });
+    if(bots.length != 4)
+    {
+        alert("Please select 4 bots to run.");
+        return;
+    }
+
+    fetch('/run/start', {
+    method: 'POST',
+    headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+    },
+    body: 
+    {
+        "bots": bots.join(",")
+    }
+    }).then(response => {
+        if(response.ok)
+        {
+            window.location.href = "/scores.html";
+        }
+        else
+        {
+            response.text().then(text => {
+            alert("Error starting run:\n" + text)
+        });
+        }
+    });
+
 }
 
 
@@ -36,25 +69,35 @@ function load_bots()
    .then(response =>
     {
         let botlist = document.getElementById("botlist");
-        for(let child in botlist.children)
+        while(botlist.firstChild)
         {
-            botlist.removeChild(child);
+            botlist.removeChild(botlist.firstChild);
         }
+        let bots = []
+        response["unselected"].forEach(bot =>
+            {
+                if(bot != "")
+                {
+                    bots.push(bot);
+                }
+            });
         if(response["selected"] != "")
         {
-            response["unselected"].append(response["selected"])
+            bots.push(response["selected"]);
         }
-
-        for(let bot in response["unselected"])
-        {
+        bots.forEach(bot => {
+            if(bot == "")
+            {
+                return;
+            }
+            let unselected_button = document.getElementById("non-selected-button");
             let bot_button = unselected_button.cloneNode(true);
             bot_button.classList.remove("hidden");
             bot_button.innerText = bot;
             bot_button.id = bot;
             bot_button.onclick = function() { select_bot(bot); };
             botlist.appendChild(bot_button);
-        }
-        document.getElementById("bottext").innerText = response;
+        });
         return response;
     });
    //.then(response => console.log(JSON.stringify(response)));
