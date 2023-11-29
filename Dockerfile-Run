@@ -1,0 +1,8 @@
+FROM gradle:8.4-jdk-alpine
+COPY --chown=gradle:gradle 'Whist-Server' /home/gradle/root
+COPY --chown=gradle:gradpe API/whist.h /home/gradle/root/src/main/resources/static/pages/whist.h
+COPY API /home/gradle/root/API/
+WORKDIR /home/gradle/root
+RUN apk add build-base
+EXPOSE 80:8080
+RUN ./gradlew run
