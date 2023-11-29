@@ -1,6 +1,7 @@
 package il.arazim
 
 import il.arazim.plugins.admin.configureAdminAuthentication
+import il.arazim.plugins.admin.configureAdminRouting
 import il.arazim.plugins.common.configureHTTP
 import il.arazim.plugins.user.configureUserAuthentication
 import il.arazim.plugins.user.configureUserRouting
