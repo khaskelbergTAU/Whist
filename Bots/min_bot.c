@@ -6,6 +6,22 @@
 card_t hand[13];
 size_t position;
 
+int compare_bets(bet_t bet1, bet_t bet2) {
+    if(bet1.number > bet2.number) {
+        return 1;
+    }
+    if(bet1.number < bet2.number) {
+        return -1;
+    }
+    if(bet1.suit < bet2.suit) {
+        return 1;
+    }
+    if(bet1.suit > bet2.suit) {
+        return -1;
+    }
+    return 0;
+}
+
 int cards_equal(card_t card1, card_t card2) {
     return (card1.suit == card2.suit) && (card1.number == card2.number);
 }
@@ -13,13 +29,26 @@ int cards_equal(card_t card1, card_t card2) {
 bet_t place_initial_bet(size_t player_position, card_t my_hand[13], bets_t previous_bets) {
     memcpy(hand, my_hand, sizeof(card_t) * 13);
     position = player_position;
-    bet_t bet = {CLUBS, 4};
-    for(int i = 0; i < 4; i++) {
-        if(!cards_equal(previous_bets.cards[i], BET_PASS) && !cards_equal(previous_bets.cards[i], BET_NOT_PLAYED)) {
-            bet = BET_PASS;
+    bet_t wanted_bet;
+    size_t suit_count[4] = {0};
+    for(int i = 0; i < 13; i++) {
+        suit_count[hand[i].suit - 1]++;
+        wanted_bet.number += (hand[i].number > 4 ? hand[i].number - 4 : 0);
+    }
+    wanted_bet.number = (wanted_bet.number * 3 / 4);
+    wanted_bet.number /= 10;
+    wanted_bet.suit = CLUBS;
+    for(int i = 2; i < 5; i++) {
+        if(suit_count[i - 1] > suit_count[wanted_bet.suit - 1]) {
+            wanted_bet.suit = i;
         }
     }
-    return bet;
+    for(int i = 0; i < 4; i++) {
+        if(compare_bets(wanted_bet, previous_bets.cards[i]) <= 0) {
+            wanted_bet = BET_PASS;
+        }
+    }
+    return wanted_bet;
 }
 
 size_t place_final_bet(suit_e trump, size_t highest_bidder, size_t final_bets[4]) {
