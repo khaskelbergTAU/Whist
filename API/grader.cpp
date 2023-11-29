@@ -169,7 +169,6 @@ const char * suit_string(suit_e suit) {
 		default:
 			return "INVALID";
 	}
-
 }
 
 std::pair<bet_t, size_t> main_bets(card_t cards[4][13], int player_invalid[4]) {
@@ -384,7 +383,8 @@ int main(int argc, char * argv[]) {
 		dbprintf(stderr, "Starting final bets\n");
 		smprintf("Final bets:\n");
 		final_bets(bet_data.first, starting_player, bets, player_invalid);
-		fprintf(stderr, "Final bets:\n %lu %lu %lu %lu", bets[0], bets[1], bets[2], bets[3]);
+		fprintf(stderr, "Final bets:\n %lu, %lu, %lu, %lu", bets[0], bets[1], bets[2], bets[3]);
+		fprintf(stderr, "Trump: %s\n", trump == NONE ? "NO TRUMP" : suit_string(trump));
 		round_t last_round;
 		for(int i = 0; i < 4; i++) {
 			last_round.cards[i] = EMPTY_CARD;
@@ -403,7 +403,7 @@ int main(int argc, char * argv[]) {
 			}
 		}
 		update_results(bets, takes, total_scores, player_invalid);
-		dbprintf(stderr, "Takes: %s: %lu, %s: %lu, %s: %lu, %s: %lu\n", argv[1], takes[0], argv[2], takes[1], argv[3], takes[2], argv[4], takes[3]);
+		fprintf(stderr, "Takes: %lu, %lu, %lu, %lu\n", takes[0], takes[1], takes[2], takes[3]);
 		smprintf("Takes: %s: %lu, %s: %lu, %s: %lu, %s: %lu\n", argv[1], takes[0], argv[2], takes[1], argv[3], takes[2], argv[4], takes[3]);
 		printf("%d,%d,%d,%d\n", total_scores[0], total_scores[1], total_scores[2], total_scores[3]);
 	}
