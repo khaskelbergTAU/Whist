@@ -1,5 +1,8 @@
 #ifndef WHIST_H
 #define WHIST_H
+
+#include <stddef.h>
+
 typedef enum suit {
 	NONE,
 	SPADES,

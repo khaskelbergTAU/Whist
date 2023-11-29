@@ -136,6 +136,24 @@ int legal_play(card_t hand[13], card_t card, suit_e starting_suit, suit_e trump)
     return 1;
 }
 
+const char * suit_string(suit_e suit) {
+    switch(suit) {
+        case CLUBS:
+            return "CLUBS";
+        case DIAMONDS:
+            return "DIAMONDS";
+        case HEARTS:
+            return "HEARTS";
+        case SPADES:
+            return "SPADES";
+        case NONE:
+            return "NONE";
+        default:
+            return "INVALID";
+    }
+
+}
+
 std::pair<bet_t, size_t> main_bets(card_t cards[4][13], int player_invalid[4]) {
     int last_changed = 0;
     int player = 0;
@@ -145,8 +163,23 @@ std::pair<bet_t, size_t> main_bets(card_t cards[4][13], int player_invalid[4]) {
         bets.cards[i] = {CLUBS, 0};
     }
     while(last_changed < 4) {
-        bet_t bet = place_initial_bet(player, player, cards[player], bets);
-        if(bet > 4 || compare_bets(bet, INVALID_BET) == 0 || player_invalid[player] || (compare_bets(bet, BET_PASS) != 0 && (bet.number < 4 || bet.number > 13 || compare_bets(bet, best_bet) <= 0))) {
+        bet_t bet = place_initial_bet_api(player, player, cards[player], bets);
+        if(compare_bets(bet, INVALID_BET) == 0 || bet.suit < 0 || bet.suit > 4 || player_invalid[player] || (compare_bets(bet, BET_PASS) != 0 && (bet.number < 4 || bet.number > 13 || compare_bets(bet, best_bet) <= 0))) {
+            if(!player_invalid[player]) {
+                log_player_err(player, "Invalid initial bet: %s %lu\n", suit_string(bet.suit), bet.number);
+                if(compare_bets(bet, INVALID_BET) == 0) {
+                    log_player_err(player, "A timeout or other error occured\n");
+                } else if(compare_bets(bet, BET_PASS) != 0 && (bet.number < 4)) {
+                    log_player_err(player, "Initial bet must be at least 4\n");
+                } else if(compare_bets(bet, BET_PASS) != 0 && (bet.number > 13)) {
+                    log_player_err(player, "Initial bet must be at most 13\n");
+                } else if(bet.suit < 0 || bet.suit > 4) {
+                    log_player_err(player, "Invalid bet suit\n");
+                } else {
+                    log_player_err(player, "Initial bet must be greater than the previous bet\n");
+                }
+                clear_player(player);
+            }
             player_invalid[player] = 1;
             if(compare_bets(best_bet, {CLUBS, 0}) == 0) {
                 bet = {CLUBS, 4};
@@ -170,8 +203,21 @@ void final_bets(bet_t highest_bet, size_t highest_bidder, size_t final_bets[4], 
         final_bets[i] = 0;
     }
     for(int player = 0; player < 4; player++) {
-        size_t final_bet = place_final_bet((highest_bidder + player) % 4, highest_bet.suit, highest_bidder, final_bets);
+        size_t final_bet = place_final_bet_api((highest_bidder + player) % 4, highest_bet.suit, highest_bidder, final_bets);
         if(final_bet == INVALID_FINAL_BET || player_invalid[(highest_bidder + player) % 4] || final_bet > 13 || (player == 0 && final_bet < highest_bet.number) || (player == 3 && final_bets[0] + final_bets[1] + final_bets[2] + final_bets[3] + final_bet == 13)) {
+            if(!player_invalid[(highest_bidder + player) % 4]) {
+                log_player_err(player, "Invalid final bet: %lu\n", final_bet);
+                if(final_bet == INVALID_FINAL_BET) {
+                    log_player_err((highest_bidder + player) % 4, "A timeout or other error occured\n");
+                } else if(final_bet > 13) {
+                    log_player_err((highest_bidder + player) % 4, "Final bet can't be more than 13\n");
+                } else if(player == 0 && final_bet < highest_bet.number) {
+                    log_player_err((highest_bidder + player) % 4, "Final bet for first player can't be lower than the initial bet\n");
+                } else {
+                    log_player_err((highest_bidder + player) % 4, "Sum of bets can't be 13\n");
+                }
+                clear_player((highest_bidder + player) % 4);
+            }
             player_invalid[(highest_bidder + player) % 4] = 1;
             if(final_bets[0] + final_bets[1] + final_bets[2] + final_bets[3] + final_bet == 12) {
                 final_bet = 2;
@@ -190,11 +236,22 @@ round_t play_round(card_t hands[4][13], size_t starting_player, round_t last_rou
     }
     suit_e starting_suit = NONE;
     for(int player = 0; player < 4; player++) {
-        card_t played_card = play_card((starting_player + player) % 4, last_round, current_round);
+        card_t played_card = play_card_api((starting_player + player) % 4, last_round, current_round);
         if(player == 0) {
             starting_suit = played_card.suit;
         }
         if((compare_cards(played_card, INVALID_CARD, NONE, NONE) == 0) || player_invalid[(starting_player + player) % 4] || !legal_play(hands[(starting_player + player) % 4], played_card, starting_suit, trump)) {
+            if(!player_invalid[(starting_player + player) % 4]) {
+                log_player_err((highest_bidder + player) % 4, "Invalid card: %d %d\n", played_card.suit, played_card.number);
+                if(compare_cards(played_card, INVALID_CARD, NONE, NONE) == 0) {
+                    log_player_err((highest_bidder + player) % 4, "A timeout or other error occured\n");
+                } else if(!hand_contains_card(hand, card)) {
+                    log_player_err((highest_bidder + player) % 4, "Card is not in hand\n");
+                } else {
+                    log_player_err((highest_bidder + player) % 4, "Card of the opening type not played despite having one\n");
+                }
+                clear_player((highest_bidder + player) % 4);
+            }
             player_invalid[(starting_player + player) % 4] = 1;
             if(player == 0) {
                 starting_suit = NONE;
@@ -250,10 +307,16 @@ int main(int argc, char * argv[]) {
     }
     int games = atoi(argv[9]);
     int total_scores[4] = {0};
+    int player_invalid[4] = {0};
     for(int game = 0; game < games; game++) {
         card_t hands[4][13];
         shuffle_cards(hands);
-        int player_invalid[4] = {0};
+        for(int i = 0; i < 4; i++) {
+            if(player_invalid[i]) {
+                set_player(i, i);
+                player_invalid[i] = 0;
+            }
+        }
         std::pair<bet_t, size_t> bet_data = main_bets(hands, player_invalid);
         suit_e trump = bet_data.first.suit;
         size_t starting_player = bet_data.second;
@@ -270,9 +333,10 @@ int main(int argc, char * argv[]) {
             takes[starting_player]++;
         }
         for(int i = 0; i < 4; i++) {
-            game_over(i, last_round);
+            game_over_api(i, last_round);
         }
         update_results(bets, takes, total_scores, player_invalid);
+        printf("%s%d,%s%d,%s%d,%s%d\n", argv[1], total_scores[0], argv[2], total_scores[1], argv[3], total_scores[2], argv[4], total_scores[3]);
     }
     for(int i = 0; i < 4; i++) {
         clear_player(i);
