@@ -73,28 +73,30 @@ function load_bots()
    //.then(response => console.log(JSON.stringify(response)));
 }
 
-function formSubmit() {
+function formSubmit(form) {
   let url = "/upload";
   let request = new XMLHttpRequest();
-  let form = document.getElementById("bot-upload-form");
   request.open("POST", url, true);
-  request.onload = function () {
-    // request successful
-    // we can use server response to our request now
-    console.log(request.responseText);
-  };
 
-  request.onerror = function () {
-    // request failed
+  request.onreadystatechange = function (ev) {
+    if (request.readyState === XMLHttpRequest.DONE && request.status === 200) {
+      load_bots();
+    } else if (request.readyState === XMLHttpRequest.DONE) {
+      window.alert("Couldnt upload bot:\n" + request.responseText);
+    }
   };
 
   request.send(new FormData(form));
 }
 
-function window_load()
-{
-    load_bots();
-    setInterval(load_bots, 1000);
+function window_load() {
+  load_bots();
+  setInterval(load_bots, 1000);
+  let form = document.getElementById("bot-upload-form");
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+    formSubmit(event.target);
+  });
 }
 
 window.onload = window_load;
