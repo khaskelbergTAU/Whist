@@ -3,10 +3,10 @@ package il.arazim.concurrent
 import il.arazim.apiDir
 import il.arazim.getExecutablesDir
 import il.arazim.getRunDir
+import io.ktor.util.logging.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import net.mamoe.yamlkt.yamlListOf
 import kotlin.io.path.*
 
 class Runner private constructor(private val group: String) {
@@ -15,7 +15,7 @@ class Runner private constructor(private val group: String) {
     private var currentJob: Job? = null
 
     @OptIn(ExperimentalPathApi::class)
-    suspend fun newRun(bots: List<String>) {
+    suspend fun newRun(bots: List<String>, rounds: Int) {
         assert(bots.size == 4)
 
         val findBot = { name: String ->
@@ -47,7 +47,9 @@ class Runner private constructor(private val group: String) {
                         runDir.resolve("2.txt").absolutePathString(),
                         runDir.resolve("3.txt").absolutePathString(),
                         runDir.resolve("4.txt").absolutePathString(),
+                        rounds.toString()
                     )
+                        .also { LOGGER.info("Running as $group: ${it.command().joinToString(separator = " ")}") }
                         .redirectError(runDir.resolve("stderr.txt").toFile())
                         .redirectOutput(runDir.resolve("stdout.txt").toFile())
                         .start()
@@ -66,6 +68,8 @@ class Runner private constructor(private val group: String) {
     companion object {
         private val INSTANCES = mutableMapOf<String, Runner>()
         private val mutex = Mutex()
+
+        private val LOGGER = KtorSimpleLogger("il.arazim.Runner")
 
         suspend fun getInstance(group: String) = mutex.withLock {
             return@withLock INSTANCES[group] ?: Runner(group)

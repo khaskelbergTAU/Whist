@@ -202,7 +202,10 @@ fun Application.configureUserRouting() {
                     it !in allBots
                 }?.let { throw ParameterException("bots", "Bot doesn't exist: $it") }
 
-                Runner.getInstance(group).newRun(bots)
+                val rounds = call.request.queryParameters["run_count"]?.toIntOrNull()
+                    ?: throw ParameterException("run_count", "Invalid run count")
+
+                Runner.getInstance(group).newRun(bots, rounds)
 
                 call.respondOk()
             }

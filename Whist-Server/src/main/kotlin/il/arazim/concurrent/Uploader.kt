@@ -1,6 +1,7 @@
 package il.arazim.concurrent
 
 import il.arazim.*
+import io.ktor.util.logging.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +23,8 @@ class Uploader private constructor(private val group: String) {
         mutex.withLock {
             var resolveOverride = 0
             while (getSourceDir(group).resolve("${name}${if (resolveOverride != 0) "_$resolveOverride" else ""}.c")
-                    .exists()) resolveOverride++
+                    .exists()
+            ) resolveOverride++
             botName = "${name.toPath().normalize().fileName}${if (resolveOverride != 0) "_$resolveOverride" else ""}"
             savePath = getSourceDir(group).resolve("$botName.c")
         }
@@ -38,6 +40,7 @@ class Uploader private constructor(private val group: String) {
             getWrapper().absolutePathString(),
             "-o", getExecutablesDir(group).resolve(botName).absolutePathString()
         )
+            .also { LOGGER.info("Compiling $botName: ${it.command().joinToString(separator = " ")}") }
             .redirectOutput(stdOutPath.toFile())
             .redirectError(stdErrPath)
             .start()
@@ -56,6 +59,8 @@ class Uploader private constructor(private val group: String) {
     companion object {
         private val INSTANCES = mutableMapOf<String, Uploader>()
         private val mutex = Mutex()
+
+        private val LOGGER = KtorSimpleLogger("il.arazim.Uploader")
 
         suspend fun getInstance(group: String) = mutex.withLock {
             return@withLock INSTANCES[group] ?: Uploader(group)
