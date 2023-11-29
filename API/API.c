@@ -1,30 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "whist.h"
-
-const int MAX_BET = 13;
-const int MIN_BET = 4;
-const bet_t BET_PASS = {NONE, 0};
-
-typedef struct {
-	size_t player_position;
-	card_t my_hand[13];
-	bets_t previous_bets;
-} init_bets_args_t;
-
-typedef struct {
-	suit_e trump;
-	size_t highest_bidder;
-	size_t final_bets[4];
-} final_bets_args_t;
-
-typedef struct {
-	round_t previous_round, current_round;
-} play_card_args_t;
-
-typedef struct {
-	round_t final_round;
-} game_over_args_t;
+#include "shared.h"
 
 void init_bets_api() {
 	init_bets_args_t args;
@@ -42,7 +18,6 @@ void init_bets_api() {
 		exit(-1);
 	}
 	fflush(stdout);
-	fprintf(stderr, "reached fwrite()\n");
 }
 
 void final_bets_api() {

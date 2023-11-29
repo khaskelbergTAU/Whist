@@ -19,7 +19,10 @@ typedef struct round {
 	card_t cards[4];
 } round_t, bets_t;
 
-const bet_t BET_PASS;
+const bet_t BET_PASS = {NONE, 0};
+const bet_t INVALID_BET = {(suit_e)-1, (size_t)-1};
+const card_t INVALID_CARD = {(suit_e)-1, (size_t)-1};
+const size_t INVALID_FINAL_BET = -1;
 
 /* to be defined by player: */
 bet_t place_initial_bet(size_t player_position, card_t my_hand[13], bets_t previous_bets);
