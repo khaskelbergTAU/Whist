@@ -73,6 +73,23 @@ function load_bots()
    //.then(response => console.log(JSON.stringify(response)));
 }
 
+function formSubmit() {
+  let url = "/upload";
+  let request = new XMLHttpRequest();
+  let form = document.getElementById("bot-upload-form");
+  request.open("POST", url, true);
+  request.onload = function () {
+    // request successful
+    // we can use server response to our request now
+    console.log(request.responseText);
+  };
+
+  request.onerror = function () {
+    // request failed
+  };
+
+  request.send(new FormData(form));
+}
 
 function window_load()
 {

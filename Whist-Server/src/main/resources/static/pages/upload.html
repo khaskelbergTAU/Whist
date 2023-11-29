@@ -82,8 +82,7 @@
           class="p-6 border border-gray-300 sm:rounded-md"
           style="background-color: var(--md-sys-color-tertiary)"
         >
-        <iframe name="dummyframe" id="dummyframe" style="display: none;"></iframe>
-          <form method="POST" action="/upload" enctype="multipart/form-data" target="dummyframe">
+          <form enctype="multipart/form-data" id="bot-upload-form">
             <label class="block mb-6">
               <span class="text-gray-700">Your Bot</span>
               <input
@@ -104,8 +103,8 @@
             </label>
             <div class="mb-6 flex justify-center mt-6">
               <button
-                type="submit"
                 class="h-10 px-5 text-indigo-100 bg-indigo-700 rounded-lg transition-colors duration-150 focus:shadow-outline hover:bg-indigo-800"
+                onclick="formSubmit()"
               >
                 Upload
               </button>
