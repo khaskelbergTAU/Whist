@@ -59,14 +59,27 @@ fun Application.configureUserRouting() {
                 val botName = botNameForm ?: throw ParameterException("bot_name", "Bot name is missing")
                 val fileStream = fileStreamForm ?: throw ParameterException("bot_file", "Bot file is missing")
 
+                if (!botName.matches("[A-Za-z0-9_]+".toRegex())) {
+                    call.respondText(
+                        status = HttpStatusCode.BadRequest,
+                        text = "Bot name contains illegal characters. Only latin letters, numbers and underscores are accepted"
+                    )
+                    return@post
+                }
+
                 val group = call.principal<GroupPrincipal>()?.name
                 if (group == null) {
                     call.respond(UnauthorizedResponse())
                     return@post
                 }
 
-                Uploader.getInstance(group).uploadBot(botName, fileStream)
-                call.respondOk()
+                val (success, output) = Uploader.getInstance(group).uploadBot(botName, fileStream)
+
+                if (!success) {
+                    call.respondText(status = HttpStatusCode.UnprocessableEntity, text = "Compilation error: $output")
+                } else {
+                    call.respondOk()
+                }
             }
         }
         route("/run") {
@@ -79,7 +92,6 @@ fun Application.configureUserRouting() {
 
                 call.respondText(results)
             }
-            
         }
         post("/logout") {
             call.respondRedirect("/")

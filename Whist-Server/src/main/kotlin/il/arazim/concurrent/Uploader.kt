@@ -15,17 +15,6 @@ import kotlin.io.path.*
 
 class Uploader private constructor(private val group: String) {
     private val mutex = Mutex()
-    private val _latest = MutableStateFlow(getSavedLatest())
-    val latest
-        get() = _latest.asStateFlow()
-
-//    private val latestPath = getSourceDir(group).resolve("latest")
-
-    private fun getSavedLatest() = getLatest(group)
-
-        .readText(Charsets.UTF_8).takeIf { it != "" && getExecutablesDir(group).resolve(it).exists() }
-
-    private fun saveLatest() = latest.value?.let { getLatest(group).writeText(it, Charsets.UTF_8) }
 
     suspend fun uploadBot(name: String, bytes: InputStream) = withContext(NonCancellable + Dispatchers.IO) {
         val savePath: Path
@@ -35,10 +24,11 @@ class Uploader private constructor(private val group: String) {
             while (getSourceDir(group).resolve("${name}_$resolveOverride.c").exists()) resolveOverride++
             botName = "${name.toPath().normalize().fileName}_$resolveOverride"
             savePath = getSourceDir(group).resolve("$botName.c")
-//            latestPath.deleteIfExists()
-//            latestPath.createSymbolicLinkPointingTo(savePath)
         }
         savePath.writeBytes(bytes.readBytes())
+
+        val stdOutPath = getCompilationLogsDir(group).resolve("$botName-stdout").normalize()
+        val stdErrPath = getCompilationLogsDir(group).resolve("$botName-stderr").normalize().toFile()
 
         val compiler = ProcessBuilder(
             "gcc",
@@ -47,8 +37,8 @@ class Uploader private constructor(private val group: String) {
             getWrapper().absolutePathString(),
             "-o", getExecutablesDir(group).resolve(botName).absolutePathString()
         )
-            .redirectOutput(getCompilationLogsDir(group).resolve("$botName-stdout").normalize().toFile())
-            .redirectError(getCompilationLogsDir(group).resolve("$botName-stderr").normalize().toFile())
+            .redirectOutput(stdOutPath.toFile())
+            .redirectError(stdErrPath)
             .start()
 
         while (compiler.isAlive) yield()
@@ -56,6 +46,10 @@ class Uploader private constructor(private val group: String) {
         if (compiler.exitValue() != 0) {
             getExecutablesDir(group).resolve("$botName.failed").createFile()
         }
+
+        val success = compiler.exitValue() == 0
+
+        return@withContext success to (if (success) stdOutPath.readText() else stdErrPath.readText())
     }
 
     companion object {
