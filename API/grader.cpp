@@ -253,7 +253,6 @@ void final_bets(bet_t highest_bet, size_t highest_bidder, size_t final_bets[4], 
 		}
 		final_bets[(highest_bidder + player) % 4] = final_bet;
 		dbprintf(stderr, "Player %lu put final bet %lu\n", (highest_bidder + player) % 4, final_bet);
-		smprintf("Player %lu put final bet %lu\n", (highest_bidder + player) % 4, final_bet);
 	}
 }
 
@@ -348,7 +347,7 @@ int main(int argc, char * argv[]) {
 	if(argc == 11) {
 		summary_file = fopen(argv[10], "w");
 	}
-    srand((unsigned)time(0));
+	srand((unsigned)time(0));
 	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)
 		perror("signal");
 	for(int i = 0; i < 4; i++) {
@@ -385,6 +384,7 @@ int main(int argc, char * argv[]) {
 		dbprintf(stderr, "Starting final bets\n");
 		smprintf("Final bets:\n");
 		final_bets(bet_data.first, starting_player, bets, player_invalid);
+		fprintf(stderr, "Final bets:\n %lu %lu %lu %lu", bets[0], bets[1], bets[2], bets[3]);
 		round_t last_round;
 		for(int i = 0; i < 4; i++) {
 			last_round.cards[i] = EMPTY_CARD;
