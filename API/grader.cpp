@@ -109,7 +109,7 @@ void shuffle_cards(card_t cards[4][13]) {
 		all_cards[i].suit = (suit_e) ((i / 13) + 1);
 		all_cards[i].number = 2 + (i % 13);
 	}
-	std::shuffle(all_cards, all_cards + 4 * 13, std::default_random_engine((unsigned)time(0)));
+	std::shuffle(all_cards, all_cards + 4 * 13, std::default_random_engine(rand());
 	for(int i = 0; i < 4 * 13; i++) {
 		cards[i / 13][i % 13] = all_cards[i];
 	}
@@ -214,7 +214,7 @@ std::pair<bet_t, size_t> main_bets(card_t cards[4][13], int player_invalid[4]) {
 			last_changed = 0;
 		}
 		dbprintf(stderr, "Player %lu bet %s %lu\n", player, suit_string(bet.suit), bet.number);
-smprintf("Player %lu bet %s %lu\n", player, suit_string(bet.suit), bet.number);
+		smprintf("Player %lu bet %s %lu\n", player, suit_string(bet.suit), bet.number);
 		bets.cards[player] = bet;
 		last_changed++;
 		player = (player + 1) % 4;
@@ -406,8 +406,8 @@ int main(int argc, char * argv[]) {
 		update_results(bets, takes, total_scores, player_invalid);
 		dbprintf(stderr, "Takes: %s: %lu, %s: %lu, %s: %lu, %s: %lu\n", argv[1], takes[0], argv[2], takes[1], argv[3], takes[2], argv[4], takes[3]);
 		smprintf("Takes: %s: %lu, %s: %lu, %s: %lu, %s: %lu\n", argv[1], takes[0], argv[2], takes[1], argv[3], takes[2], argv[4], takes[3]);
-		printf("%s,%d,%s,%d,%s,%d,%s,%d\n", argv[1], total_scores[0], argv[2], total_scores[1], argv[3], total_scores[2], argv[4], total_scores[3]);
 	}
+	printf("%d,%d,%d,%d\n", total_scores[0], total_scores[1], total_scores[2], total_scores[3]);
 	for(int i = 0; i < 4; i++) {
 		clear_player(i);
 	}
