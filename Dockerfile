@@ -11,6 +11,7 @@ EXPOSE 80:8080
 COPY API /app/API/
 RUN g++ -I /app/API /app/API/grader.cpp /app/API/engine_api.c -o /app/API/grader
 COPY Bots /tmp/bots-compile/source
+RUN mkdir /tmp/bots-compile/exec
 RUN gcc -I /app/API /tmp/bots-compile/source/min_bot.c /app/API/API.c -o /tmp/bots-compile/exec/min_bot
 RUN gcc -I /app/API /tmp/bots-compile/source/max_bot.c /app/API/API.c -o /tmp/bots-compile/exec/max_bot
 RUN gcc -I /app/API /tmp/bots-compile/source/random_bot.c /app/API/API.c -o /tmp/bots-compile/exec/random_bot
