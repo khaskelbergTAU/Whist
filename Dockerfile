@@ -9,5 +9,5 @@ RUN mkdir /app
 RUN apk add build-base
 EXPOSE 80:8080
 COPY --from=build /home/gradle/src/build/libs/*.jar /app/server.jar
-COPY API /app/
+COPY API /app/API/
 ENTRYPOINT ["java", "-jar", "/app/server.jar"]
