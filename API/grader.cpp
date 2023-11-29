@@ -11,6 +11,14 @@
 #define dbprintf(...)
 #endif
 
+#define smprintf(...) {\
+	if(summary_file != NULL) {\
+		fprintf(summary_file, __VA_ARGS__);\
+	}\
+}
+
+FILE *summary_file = NULL;
+
 int compare_bets(bet_t bet1, bet_t bet2) {
 	if(bet1.number > bet2.number) {
 		return 1;
@@ -206,6 +214,7 @@ std::pair<bet_t, size_t> main_bets(card_t cards[4][13], int player_invalid[4]) {
 			last_changed = 0;
 		}
 		dbprintf(stderr, "Player %lu bet %s %lu\n", player, suit_string(bet.suit), bet.number);
+smprintf("Player %lu bet %s %lu\n", player, suit_string(bet.suit), bet.number);
 		bets.cards[player] = bet;
 		last_changed++;
 		player = (player + 1) % 4;
@@ -246,6 +255,7 @@ void final_bets(bet_t highest_bet, size_t highest_bidder, size_t final_bets[4], 
 		}
 		final_bets[(highest_bidder + player) % 4] = final_bet;
 		dbprintf(stderr, "Player %lu put final bet %lu\n", (highest_bidder + player) % 4, final_bet);
+		smprintf("Player %lu put final bet %lu\n", (highest_bidder + player) % 4, final_bet);
 	}
 }
 
@@ -285,6 +295,7 @@ round_t play_round(card_t hands[4][13], size_t starting_player, round_t last_rou
 		remove_card_from_hand(hands[(starting_player + player) % 4], played_card);
 		current_round.cards[(starting_player + player) % 4] = played_card;
 		dbprintf(stderr, "Player %lu played %s %lu\n", (starting_player + player) % 4, suit_string(played_card.suit), played_card.number);
+		smprintf("Player %lu played %s %lu\n", (starting_player + player) % 4, suit_string(played_card.suit), played_card.number);
 	}
 	return current_round;
 }
@@ -304,6 +315,7 @@ void update_results(size_t bets[4], size_t takes[4], int total_scores[4], int pl
 		if(player_invalid[i]) {
 			total_scores[i] -= 50;
 			fprintf(stderr, "Player %d was invalid\n", i);
+			smprintf("Player %d: -50\n", i);
 			if(i == 3) {
 				exit(-1);
 			}
@@ -311,29 +323,37 @@ void update_results(size_t bets[4], size_t takes[4], int total_scores[4], int pl
 			if(bets[i] == 0) {
 				if(bets[0] + bets[1] + bets[2] + bets[3] < 13) {
 					dbprintf(stderr, "Player %d: +50\n", i);
+					smprintf("Player %d: +50\n", i);
 					total_scores[i] += 50;
 				} else {
 					dbprintf(stderr, "Player %d: +25\n", i);
+					smprintf("Player %d: +25\n", i);
 					total_scores[i] += 25;
 				}
 			} else {
 				dbprintf(stderr, "Player %d: +%ld\n", i, 10 + bets[i] * bets[i]);
+				smprintf("Player %d: +%ld\n", i, 10 + bets[i] * bets[i]);
 				total_scores[i] += 10 + bets[i] * bets[i];
 			}
 		} else {
 			dbprintf(stderr, "Player %d: -%d\n", i, 10 * ABS(((int) bets[i]) - ((int) takes[i])));
+			smprintf("Player %d: -%d\n", i, 10 * ABS(((int) bets[i]) - ((int) takes[i])));
 			total_scores[i] -= 10 * ABS(((int) bets[i]) - ((int) takes[i]));
 		}
 	}
 }
 
 int main(int argc, char * argv[]) {
-	if(argc != 10) {
-		printf("Usage: %s <player1> <player2> <player3> <player4> <log1> <log2> <log3> <log4> <games>\n", argv[0]);
+	if(argc < 10) {
+		printf("Usage: %s <player1> <player2> <player3> <player4> <log1> <log2> <log3> <log4> <games> [game_summary]\n", argv[0]);
+	}
+	if(argc == 11) {
+		summary_file = fopen(argv[10], "w");
 	}
 	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)
 		perror("signal");
 	for(int i = 0; i < 4; i++) {
+		smprintf("Player %d is %s\n", i, argv[i + 1]);
 		set_exec(i, argv[i + 1], argv[i + 5]);
 		set_player(i, i);
 	}
@@ -342,6 +362,7 @@ int main(int argc, char * argv[]) {
 	int player_invalid[4] = {0};
 	for(int game = 0; game < games; game++) {
 		fprintf(stderr, "--------Starting game %d---------\n", game);
+		smprintf("Starting game %d:\n", game);
 		card_t hands[4][13];
 		shuffle_cards(hands);
 		for(int i = 0; i < 4; i++) {
@@ -357,11 +378,13 @@ int main(int argc, char * argv[]) {
 			}
 		}
 		dbprintf(stderr, "Starting main bets\n");
+		smprintf("Main bets\n");
 		std::pair<bet_t, size_t> bet_data = main_bets(hands, player_invalid);
 		suit_e trump = bet_data.first.suit;
 		size_t starting_player = bet_data.second;
 		size_t bets[4];
 		dbprintf(stderr, "Starting final bets\n");
+		smprintf("Final bets:\n");
 		final_bets(bet_data.first, starting_player, bets, player_invalid);
 		round_t last_round;
 		for(int i = 0; i < 4; i++) {
@@ -370,6 +393,7 @@ int main(int argc, char * argv[]) {
 		size_t takes[4] = {0};
 		for(int round = 0; round < 13; round++) {
 			dbprintf(stderr, "Round %d\n", round + 1);
+			smprintf("Round %d:\n", round + 1);
 			last_round = play_round(hands, starting_player, last_round, trump, player_invalid);
 			starting_player = get_winner(last_round, last_round.cards[starting_player].suit, trump);
 			takes[starting_player]++;
@@ -381,6 +405,7 @@ int main(int argc, char * argv[]) {
 		}
 		update_results(bets, takes, total_scores, player_invalid);
 		dbprintf(stderr, "Takes: %s: %lu, %s: %lu, %s: %lu, %s: %lu\n", argv[1], takes[0], argv[2], takes[1], argv[3], takes[2], argv[4], takes[3]);
+		smprintf("Takes: %s: %lu, %s: %lu, %s: %lu, %s: %lu\n", argv[1], takes[0], argv[2], takes[1], argv[3], takes[2], argv[4], takes[3]);
 		printf("%s,%d,%s,%d,%s,%d,%s,%d\n", argv[1], total_scores[0], argv[2], total_scores[1], argv[3], total_scores[2], argv[4], total_scores[3]);
 	}
 	for(int i = 0; i < 4; i++) {

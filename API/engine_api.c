@@ -26,10 +26,10 @@ const char FINAL_BET_OP = 'f';
 const char PLAY_CARD_OP = 'p';
 const char GAME_OVER_OP = 'o';
 
-const int INITIAL_BET_TIMEOUT_MS = 20;
-const int FINAL_BET_TIMEOUT_MS = 12;
-const int PLAY_CARD_TIMEOUT_MS = 8;
-const int GAME_OVER_TIMEOUT_MS = 5;
+const int INITIAL_BET_TIMEOUT_MS = 40;
+const int FINAL_BET_TIMEOUT_MS = 24;
+const int PLAY_CARD_TIMEOUT_MS = 16;
+const int GAME_OVER_TIMEOUT_MS = 10;
 
 const bet_t BET_PASS = {NONE, 0};
 const bet_t BET_NOT_PLAYED = {CLUBS, 0};
@@ -193,6 +193,7 @@ void replace_player(size_t player_id, size_t exec_id) {
 }
 
 bet_t place_initial_bet_api(size_t player_id, size_t player_position, card_t my_hand[13], bets_t previous_bets) {
+	//player_perm[player_id];
 	init_bets_args_t args;
 	bet_t res = {(suit_e) 69, 420};
 	args.player_position = player_position;
@@ -217,6 +218,7 @@ bet_t place_initial_bet_api(size_t player_id, size_t player_position, card_t my_
 }
 
 size_t place_final_bet_api(size_t player_id, suit_e trump, size_t highest_bidder, size_t final_bets[4]) {
+	//player_perm[player_id];
 	final_bets_args_t args;
 	size_t res;
 	args.trump = trump;
@@ -241,6 +243,7 @@ size_t place_final_bet_api(size_t player_id, suit_e trump, size_t highest_bidder
 }
 
 card_t play_card_api(size_t player_id, round_t previous_round, round_t current_round) {
+	//player_perm[player_id];
 	play_card_args_t args;
 	card_t res;
 	args.previous_round = previous_round;
@@ -264,6 +267,7 @@ card_t play_card_api(size_t player_id, round_t previous_round, round_t current_r
 }
 
 void game_over_api(size_t player_id, round_t final_round) {
+	//player_perm[player_id];
 	game_over_args_t args;
 	int res;
 	args.final_round = final_round;
