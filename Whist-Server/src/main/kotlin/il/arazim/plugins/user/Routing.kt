@@ -101,6 +101,22 @@ fun Application.configureUserRouting() {
 
                     call.respondText(results)
                 }
+                get("/errors") {
+                    val group = call.principal<GroupPrincipal>()?.name
+                    if (group == null) {
+                        call.respond(UnauthorizedResponse())
+                        return@get
+                    }
+
+                    val results =
+                        getRunDir(group).resolve("stderr.txt").takeIf { it.exists() }?.readText(Charsets.UTF_8)
+
+                    if (results == null) {
+                        throw Exception("There has been no runs")
+                    }
+
+                    call.respondText(results)
+                }
                 get("/log/{index}") {
                     val group = call.principal<GroupPrincipal>()?.name
                     if (group == null) {
