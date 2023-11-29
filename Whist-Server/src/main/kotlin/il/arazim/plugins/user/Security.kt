@@ -11,10 +11,13 @@ fun Application.configureUserAuthentication() {
     authentication {
         val userRealm = "user-access"
         val userTable: Map<String, ByteArray> = mapOf(
-            "group1" to "test1",
-            "group2" to "test2",
-            "group3" to "test3",
-            "group4" to "test4",
+            "admin" to "OmriYuvalYuvalMark",
+            "Pythagoras" to "a^2+b^2=c^2",
+            "Euclid" to "e^(pi*i)=-1",
+            "Newton" to "E=mc^2",
+            "Fibonacci" to "f(n)=f(n-1)+f(n-2)",
+            "Ferma" to "Password didn't fit in the margin",
+            "test" to "test",
         ).mapValues { (user, password) ->
             MessageDigest.getInstance("MD5").digest("$user:$userRealm:$password".toByteArray(UTF_8))
         }
