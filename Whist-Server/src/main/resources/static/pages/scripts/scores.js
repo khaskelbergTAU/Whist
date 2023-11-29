@@ -2,7 +2,7 @@ function update_scores() {
   try {
     path = "/run/results";
     if (current_log < 4) {
-      path = "/run/log" + current_log;
+      path = "/run/log/" + (current_log + 1);
     }
     fetch(path, {
       method: "GET",

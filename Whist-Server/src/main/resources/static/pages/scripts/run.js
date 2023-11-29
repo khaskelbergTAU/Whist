@@ -41,28 +41,20 @@ function start_run()
         return;
     }
 
-    fetch('/run/start', {
-    method: 'POST',
-    headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-    },
-    body: 
-    {
-        "bots": bots.join(","),
-        "run_count": run_count,
-    }
-    }).then(response => {
-        if(response.ok)
-        {
-            window.location.href = "/scores.html";
-        }
-        else
-        {
-            response.text().then(text => {
-            alert("Error starting run:\n" + text)
+    fetch("/run/start?bots=" + bots.join(",") + "&run_count=" + run_count, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    }).then((response) => {
+      if (response.ok) {
+        window.location.href = "/scores.html";
+      } else {
+        response.text().then((text) => {
+          alert("Error starting run:\n" + text);
         });
-        }
+      }
     });
 
 }
