@@ -74,10 +74,58 @@
         </div>
       </nav>
     </div>
-    <div class="grid h-screen place-items-start" style="background-color: var(--md-sys-color-secondary);">
-      <span id="scoretext">
-
-      </span>
+    <div
+      class="grid h-[calc(100vh-64px)] place-items-middle grid-cols-3"
+      style="background-color: var(--md-sys-color-secondary)"
+    >
+      <div class="flex flex-col">
+        <div class="flex flex-col">
+          <div class="flex justify-center">
+            <h1>Run Output:</h1>
+          </div>
+          <span id="scoretext"> </span>
+        </div>
+      </div>
+      <div class="flex flex-col">
+        <div class="flex flex-col">
+          <div class="flex justify-center">
+            <h1>Run Debug Output:</h1>
+          </div>
+          <span id="errortext"> </span>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 place-items-center">
+        <button
+          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          onclick="getLog(0)"
+        >
+          Player 0
+        </button>
+        <button
+          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          onclick="getLog(1)"
+        >
+          Player 1
+        </button>
+        <button
+          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          onclick="getLog(2)"
+        >
+          Player 2
+        </button>
+        <button
+          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          onclick="getLog(3)"
+        >
+          Player 3
+        </button>
+        <button
+          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          onclick="getLog(4)"
+        >
+          Main Output
+        </button>
+      </div>
     </div>
   </body>
 </html>

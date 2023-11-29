@@ -73,7 +73,7 @@
       </nav>
     </div>
     <div
-      class="grid h-screen place-items-center"
+      class="grid h-[calc(100vh-64px)] place-items-center"
       style="background-color: var(--md-sys-color-secondary)"
     >
       <h1
@@ -101,15 +101,27 @@
         If you crash, you will be replaced with a bot, and lose 50 points.<br />
       </span>
 
-      <div
-        style="
-          background-color: var(--md-sys-color-primary);
-          border-radius: 6px;
-        "
-      >
-        <a href="whist.h" download="whist.h" style="margin: 4px"
-          >Download whist.h</a
+      <div class="grid grid-cols-2 gap-x-2">
+        <div class="flex justify-center"
+          style="
+            background-color: var(--md-sys-color-primary);
+            border-radius: 6px;
+          "
         >
+          <a href="whist.h" download="whist.h" style="margin: 4px"
+            >Download whist.h</a
+          >
+        </div>
+        <div class="flex justify-center"
+          style="
+            background-color: var(--md-sys-color-primary);
+            border-radius: 6px;
+          "
+        >
+          <a href="bots.zip" download="bots.zip" style="margin: 4px"
+            >Download example bots</a
+          >
+        </div>
       </div>
     </div>
   </body>

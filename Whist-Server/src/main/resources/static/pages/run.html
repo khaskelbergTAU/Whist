@@ -74,7 +74,7 @@
       </nav>
     </div>
     <div
-      class="grid grid-cols-3 h-screen place-items-center"
+      class="grid grid-cols-2 h-[calc(100vh-64px)] place-items-center"
       style="background-color: var(--md-sys-color-secondary)"
     >
       <div class="w-full flex justify-center">
@@ -99,16 +99,26 @@
         </div>
       </div>
       <div>
-                
-        <button onclick="start_run()" class="h-10 px-5 text-indigo-100 bg-indigo-700 rounded-lg transition-colors duration-150 focus:shadow-outline hover:bg-indigo-800">Run</button>
-      </div>
-      <div
-        class="w-48 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-      >
-        <div class="flex justify-center w-full">
-          <label> Selected Bots </label>
+        <div class="grid grid-rows-2 mb-2">
+          <label> Number of rounds </label>
+          <input id="run_count" />
         </div>
-        <div id="current_bots"></div>
+        <div
+          class="w-48 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+        >
+          <div class="w-full flex justify-center">
+            <label> Selected Bots </label>
+          </div>
+          <div id="current_bots"></div>
+        </div>
+        <div class="flex justify-center mt-2">
+          <button
+            onclick="start_run()"
+            class="h-10 px-5 text-indigo-100 bg-indigo-700 rounded-lg transition-colors duration-150 focus:shadow-outline hover:bg-indigo-800"
+          >
+            Run
+          </button>
+        </div>
       </div>
     </div>
   </body>

@@ -28,6 +28,18 @@ function start_run()
         alert("Please select 4 bots to run.");
         return;
     }
+    run_count_input = document.getElementById("run_count");
+    if(run_count_input.value == "")
+    {
+        alert("Please enter a run count.");
+        return;
+    }
+    let run_count = parseInt(run_count_input.value);
+    if(isNaN(run_count))
+    {
+        alert("Please enter a valid run count.");
+        return;
+    }
 
     fetch('/run/start', {
     method: 'POST',
@@ -37,7 +49,8 @@ function start_run()
     },
     body: 
     {
-        "bots": bots.join(",")
+        "bots": bots.join(","),
+        "run_count": run_count,
     }
     }).then(response => {
         if(response.ok)
