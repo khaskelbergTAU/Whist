@@ -10,14 +10,16 @@ fun main(args: Array<String>) {
     io.ktor.server.netty.EngineMain.main(args)
 }
 
+fun Application.commonModule() {
+    configureHTTP()
+}
+
 fun Application.userModule() {
     configureUserAuthentication()
-    configureHTTP()
     configureUserRouting()
 }
 
 fun Application.adminModule() {
     configureAdminAuthentication()
-    configureHTTP()
-    configureUserRouting()
+    configureAdminRouting()
 }
