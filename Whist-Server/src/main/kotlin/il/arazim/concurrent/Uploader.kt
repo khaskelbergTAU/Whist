@@ -1,5 +1,6 @@
 package il.arazim.concurrent
 
+import il.arazim.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,7 +12,6 @@ import kotlinx.coroutines.yield
 import java.io.InputStream
 import java.nio.file.Path
 import kotlin.io.path.*
-import il.arazim.toPath
 
 class Uploader private constructor(private val group: String) {
     private val mutex = Mutex()
@@ -24,6 +24,7 @@ class Uploader private constructor(private val group: String) {
     private fun getSavedLatest() = getLatest(group)
 
         .readText(Charsets.UTF_8).takeIf { it != "" && getExecutablesDir(group).resolve(it).exists() }
+
     private fun saveLatest() = latest.value?.let { getLatest(group).writeText(it, Charsets.UTF_8) }
 
     suspend fun uploadBot(name: String, bytes: InputStream) = withContext(NonCancellable + Dispatchers.IO) {
@@ -31,7 +32,7 @@ class Uploader private constructor(private val group: String) {
         val botName: String
         mutex.withLock {
             var resolveOverride = 0
-            while (getSourceDir(group).resolve("${name}_$resolveOverride").exists()) resolveOverride++
+            while (getSourceDir(group).resolve("${name}_$resolveOverride.c").exists()) resolveOverride++
             botName = "${name.toPath().normalize().fileName}_$resolveOverride"
             savePath = getSourceDir(group).resolve("$botName.c")
 //            latestPath.deleteIfExists()
@@ -39,10 +40,16 @@ class Uploader private constructor(private val group: String) {
         }
         savePath.writeBytes(bytes.readBytes())
 
-        val compiler = ProcessBuilder("gcc ${savePath.absolutePathString()} ${
-            getWrapper().absolutePathString()} -o ${getExecutablesDir(group).resolve(botName)}")
+        val compiler = ProcessBuilder(
+            "gcc",
+            "-I", apiDir.absolutePathString(),
+            savePath.absolutePathString(),
+            getWrapper().absolutePathString(),
+            "-o", getExecutablesDir(group).resolve(botName).absolutePathString()
+        )
             .redirectOutput(getCompilationLogsDir(group).resolve("$botName-stdout").normalize().toFile())
-            .redirectError(getCompilationLogsDir(group).resolve("$botName-stderr").normalize().toFile()).start()
+            .redirectError(getCompilationLogsDir(group).resolve("$botName-stderr").normalize().toFile())
+            .start()
 
         while (compiler.isAlive) yield()
 

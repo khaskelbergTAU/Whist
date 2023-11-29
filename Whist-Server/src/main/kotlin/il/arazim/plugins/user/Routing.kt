@@ -12,10 +12,8 @@ import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 import java.io.InputStream
-import kotlin.io.path.*
+import kotlin.io.path.readText
 
 fun Application.configureUserRouting() {
     install(AutoHeadResponse)
@@ -61,34 +59,30 @@ fun Application.configureUserRouting() {
                 val botName = botNameForm ?: throw ParameterException("bot_name", "Bot name is missing")
                 val fileStream = fileStreamForm ?: throw ParameterException("bot_file", "Bot file is missing")
 
-                call.respondOk()
-
                 val group = call.principal<GroupPrincipal>()?.name
                 if (group == null) {
                     call.respond(UnauthorizedResponse())
                     return@post
                 }
 
-                coroutineScope {
-                    launch {
-                        Uploader.getInstance(group).uploadBot(botName, fileStream)
-                    }
-                }
+                Uploader.getInstance(group).uploadBot(botName, fileStream)
+                call.respondOk()
             }
-            route("/run") {
-                get("/results") {
-                    val results = getRunResults().readText(Charsets.UTF_8)
+        }
+        route("/run") {
+            get("/results") {
+                val results = getRunResults().readText(Charsets.UTF_8)
 
-                    if (results == "") {
-                        throw Exception("There has been no runs")
-                    }
-
-                    call.respondText(results)
+                if (results == "") {
+                    throw Exception("There has been no runs")
                 }
+
+                call.respondText(results)
             }
-            post("/logout") {
-                call.respondRedirect("/")
-            }
+            
+        }
+        post("/logout") {
+            call.respondRedirect("/")
         }
     }
 }

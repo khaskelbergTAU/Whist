@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "../API/whist.h"
+#include "whist.h"
 
 card_t hand[13];
 
