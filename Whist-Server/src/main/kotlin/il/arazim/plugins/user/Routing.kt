@@ -1,9 +1,8 @@
 package il.arazim.plugins.user
 
+import il.arazim.*
+import il.arazim.concurrent.Runner
 import il.arazim.concurrent.Uploader
-import il.arazim.getExecutablesDir
-import il.arazim.getRunResults
-import il.arazim.getSelected
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.application.*
@@ -88,9 +87,16 @@ fun Application.configureUserRouting() {
             }
             route("/run") {
                 get("/results") {
-                    val results = getRunResults().readText(Charsets.UTF_8)
+                    val group = call.principal<GroupPrincipal>()?.name
+                    if (group == null) {
+                        call.respond(UnauthorizedResponse())
+                        return@get
+                    }
 
-                    if (results == "") {
+                    val results =
+                        getRunDir(group).resolve("stdout.txt").takeIf { it.exists() }?.readText(Charsets.UTF_8)
+
+                    if (results == null) {
                         throw Exception("There has been no runs")
                     }
 
@@ -103,31 +109,39 @@ fun Application.configureUserRouting() {
                         return@get
                     }
 
-                    val allCompilations = getExecutablesDir(group).toFile().list()
+                    val allCompilations = getAllBots(group)
                         .filterNot { it.endsWith(".failed") }
 
                     val selected = getSelected(group).readText()
 
-                    call.respondText("""
+                    call.respondText(
+                        """
                     {
-                    "unselected": [${allCompilations.filterNot { it == selected }.joinToString(separator = "\", \"", prefix = "\"", postfix = "\"")}],
+                    "unselected": [${
+                            allCompilations.filterNot { it == selected }
+                                .joinToString(separator = "\", \"", prefix = "\"", postfix = "\"")
+                        }],
                     "selected": "$selected"
                     }
-                    """.trimIndent())
+                    """.trimIndent()
+                    )
                 }
-                post("select") {
+                post("/select") {
                     val group = call.principal<GroupPrincipal>()?.name
                     if (group == null) {
                         call.respond(UnauthorizedResponse())
                         return@post
                     }
 
-                    val botName = call.request.queryParameters["bot"] ?: throw ParameterException("bot", "Bot name is missing")
+                    val botName =
+                        call.request.queryParameters["bot"] ?: throw ParameterException("bot", "Bot name is missing")
 
-                    if (!getExecutablesDir(group).resolve(botName).exists()) {
-                        call.respond(status = HttpStatusCode.BadRequest, """
+                    if (botName !in getAllBots(group)) {
+                        call.respond(
+                            status = HttpStatusCode.BadRequest, """
                             Bot doesn't exist
-                        """.trimIndent())
+                        """.trimIndent()
+                        )
                     }
 
                     getSelected(group).writeText(botName)
@@ -137,6 +151,26 @@ fun Application.configureUserRouting() {
             }
             post("/logout") {
                 call.respondRedirect("/")
+            }
+            post("/start") {
+                val group = call.principal<GroupPrincipal>()?.name
+                if (group == null) {
+                    call.respond(UnauthorizedResponse())
+                    return@post
+                }
+
+                val bots = call.request.queryParameters["bots"]?.split(",")?.map(String::trim)?.takeIf { it.size == 4 }
+                    ?: throw ParameterException("bots", "Bot list missing or invalid")
+
+                val allBots = getAllBots(group)
+
+                bots.find {
+                    it !in allBots
+                }?.let { throw ParameterException("bots", "Bot doesn't exist: $it") }
+
+                Runner.getInstance(group).newRun(bots)
+
+                call.respondOk()
             }
         }
     }

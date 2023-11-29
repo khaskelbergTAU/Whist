@@ -9,10 +9,13 @@ fun getSubmissionDir(group: String): Path = rootDir.resolve("bots/$group/submiss
 fun getSourceDir(group: String): Path = getSubmissionDir(group).resolve("source").apply { createDirectories() }
 fun getCompilationLogsDir(group: String): Path = getSubmissionDir(group).resolve("clogs").apply { createDirectories() }
 fun getExecutablesDir(group: String): Path = getSubmissionDir(group).resolve("exec").apply { createDirectories() }
-fun getSelected(group: String): Path = getSubmissionDir(group).resolve("latest.txt").also { if (!it.exists()) it.createFile() }
+fun getSelected(group: String): Path =
+    getSubmissionDir(group).resolve("latest.txt").also { if (!it.exists()) it.createFile() }
 
-fun getWrapper() = apiDir.resolve("API.c")
+fun getAllBots(group: String) : List<String> =
+    (getExecutablesDir(group).toFile().list()?.asList() ?: emptyList<String>()) + (getExecutablesDir("common").toFile()
+        .list()?.asList()?: emptyList())
 
-fun getRunDir(): Path = rootDir.resolve("run").apply { createDirectories() }
-fun getRunResults(): Path = getRunDir().resolve("output.txt").also { if (!it.exists()) it.createFile() }
-fun getRunLog(group: String): Path = getRunDir().resolve("$group.log").also { if (!it.exists()) it.createFile() }
+fun getWrapper(): Path = apiDir.resolve("API.c")
+
+fun getRunDir(group: String): Path = rootDir.resolve("run/$group").apply { createDirectories() }
