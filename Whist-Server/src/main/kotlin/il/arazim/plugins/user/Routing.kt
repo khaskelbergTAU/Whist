@@ -210,7 +210,11 @@ fun Application.configureUserRouting() {
             post("/logout") {
                 call.respondRedirect("/")
             }
-
+            staticFiles(
+                remotePath = "/",
+                dir = "zips".toPath().toFile(),
+                index = null
+            )
         }
     }
 }

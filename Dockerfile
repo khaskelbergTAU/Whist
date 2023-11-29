@@ -7,6 +7,7 @@ RUN ./gradlew buildFatJar --no-daemon
 FROM amazoncorretto:20-alpine
 RUN mkdir /app
 RUN apk add build-base
+RUN apk add zip
 EXPOSE 80:8080
 COPY API /app/API/
 RUN g++ -I /app/API /app/API/grader.cpp /app/API/engine_api.c -o /app/API/grader
@@ -17,6 +18,8 @@ RUN gcc -I /app/API /tmp/bots-compile/source/max_bot.c /app/API/API.c -o /tmp/bo
 RUN gcc -I /app/API /tmp/bots-compile/source/random_bot.c /app/API/API.c -o /tmp/bots-compile/exec/random_bot
 RUN mkdir -p /app/serverFiles/bots/common/submissions/exec
 RUN cp /tmp/bots-compile/exec/* /app/serverFiles/bots/common/submissions/exec
+RUN mkdir /app/zips
+RUN zip /app/zips/bots.zip /tmp/bots-compile/source/*
 COPY --from=build /home/gradle/src/build/libs/*.jar /app/server.jar
 WORKDIR /app
 ENTRYPOINT ["java", "-jar", "server.jar"]
