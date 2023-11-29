@@ -19,7 +19,7 @@ RUN gcc -I /app/API /tmp/bots-compile/source/random_bot.c /app/API/API.c -o /tmp
 RUN mkdir -p /app/serverFiles/bots/common/submissions/exec
 RUN cp /tmp/bots-compile/exec/* /app/serverFiles/bots/common/submissions/exec
 RUN mkdir /app/zips
-RUN zip /app/zips/bots.zip /tmp/bots-compile/source/*
+RUN zip -j /app/zips/bots.zip /tmp/bots-compile/source/min_bot /tmp/bots-compile/source/max_bot /tmp/bots-compile/source/random_bot
 COPY --from=build /home/gradle/src/build/libs/*.jar /app/server.jar
 WORKDIR /app
 ENTRYPOINT ["java", "-jar", "server.jar"]
