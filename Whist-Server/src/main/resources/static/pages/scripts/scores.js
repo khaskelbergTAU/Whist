@@ -1,6 +1,6 @@
 function update_scores()
 {
-    fetch('/scores', {
+    fetch('/run/results', {
     method: 'GET',
     headers: {
         'Accept': 'text/plain',
@@ -16,4 +16,10 @@ function update_scores()
    //.then(response => console.log(JSON.stringify(response)));
 }
 
-window.onload = update_scores;
+function window_load()
+{
+    update_scores();
+    setInterval(update_scores, 1000);
+}
+
+window.onload = window_load;

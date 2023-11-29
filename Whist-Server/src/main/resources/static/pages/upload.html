@@ -3,6 +3,7 @@
   <head>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="styles/theme.css" />
+    <script src="/scripts/upload.js"></script>
   </head>
   <body>
     <div>
@@ -42,6 +43,13 @@
                   class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:text-blue-700 md:dark:text-blue-500 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
                   aria-current="page"
                   >Upload</a
+                >
+              </li>
+              <li>
+                <a
+                  href="/run.html"
+                  class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+                  >Run</a
                 >
               </li>
               <li>
@@ -104,10 +112,28 @@
           </form>
         </div>
       </div>
-      <div class="w-full">
-        <ul>
-          
-        </ul>
+      <div class="w-full flex justify-center">
+        <div
+          class="w-48 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+        >
+          <button
+            aria-current="true"
+            type="button"
+            id="selected-button"
+            class="hidden w-full px-4 py-2 font-medium text-left rtl:text-right text-white bg-blue-700 border-b border-gray-200 rounded-t-lg cursor-pointer focus:outline-none dark:bg-gray-800 dark:border-gray-600"
+          ></button>
+          <button
+            type="button"
+            id="non-selected-button"
+            class="hidden w-full px-4 py-2 font-medium text-left rtl:text-right border-b border-gray-200 cursor-pointer hover:bg-gray-100 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-600 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-500 dark:focus:text-white"
+          ></button>
+          <div class="flex justify-center w-full">
+            <label> Select Bots </label>
+          </div>
+          <div id="botlist">
+
+          </div>
+        </div>
       </div>
     </div>
   </body>

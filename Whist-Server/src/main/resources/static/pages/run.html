@@ -3,6 +3,7 @@
   <head>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="styles/theme.css" />
+    <script src="/scripts/run.js"></script>
   </head>
   <body>
     <div>
@@ -20,34 +21,34 @@
               alt="Whist Logo"
             />
             <span
-              class="self-center text-2xl font-semibold whitespace-nowrap text-white"
+              class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white"
               >Whist</span
             >
           </a>
           <div class="hidden w-full md:block md:w-auto" id="navbar-default">
             <ul
-              class="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:dark:bg-green-700 dark:border-gray-700"
+              class="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-green-700 dark:border-gray-700"
               style="background-color: var(--md-sys-color-primary)"
             >
               <li>
                 <a
                   href="/"
-                  class="block py-2 px-3 text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500"
-                  aria-current="page"
+                  class="block py-2 px-3 text-white rounded md:bg-transparent md:p-0 md:hover:text-blue-700 dark:text-white"
                   >Home</a
                 >
               </li>
               <li>
                 <a
                   href="/upload.html"
-                  class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+                  class="block py-2 px-3 text-white rounded md:bg-transparent md:p-0 md:hover:text-blue-700 dark:text-white"
                   >Upload</a
                 >
               </li>
               <li>
                 <a
                   href="/run.html"
-                  class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+                  class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:text-blue-700 md:dark:text-blue-500 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+                  aria-current="page"
                   >Run</a
                 >
               </li>
@@ -73,43 +74,31 @@
       </nav>
     </div>
     <div
-      class="grid h-screen place-items-center"
+      class="grid grid-cols-2 h-screen place-items-center"
       style="background-color: var(--md-sys-color-secondary)"
     >
-      <h1
-        class="text-3xl font-sans font-bold"
-        style="color: var(--md-sys-color-on-secondary)"
-      >
-        Whist! Arazim <br />
-        Rules:<br />
-        if you dont know how to play Whist, ask a friend.<br />
-        if you dont have any friends, hanich yakar behatslakha.<br />
-        Upload your code to the "Upload" page.<br />
-        The code should be a .c file, implementing the header file given
-        below.<br />
-        The code should be compilable with gcc, without a main function. (read
-        about -c flag)<br />
-      </h1>
-      <span
-        class="text-xl font-sans"
-        style="color: var(--md-sys-color-on-secondary)"
-      >
-        On every illegal returned value from a function we call, you will be
-        replaced with a bot, and lose 50 points.<br />
-        If a move takes too long (too long is for us to decide), its the same as
-        a crash.<br />
-        If you crash, you will be replaced with a bot, and lose 50 points.<br />
-      </span>
-
-      <div
-        style="
-          background-color: var(--md-sys-color-primary);
-          border-radius: 6px;
-        "
-      >
-        <a href="whist.h" download="whist.h" style="margin: 4px"
-          >Download whist.h</a
+      <div class="w-full flex justify-center">
+        <div
+          class="w-48 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
         >
+          <button
+            aria-current="true"
+            type="button"
+            id="selected-button"
+            class="hidden w-full px-4 py-2 font-medium text-left rtl:text-right text-white bg-blue-700 border-b border-gray-200 rounded-t-lg cursor-pointer focus:outline-none dark:bg-gray-800 dark:border-gray-600"
+          ></button>
+          <button
+            type="button"
+            id="non-selected-button"
+            class="hidden w-full px-4 py-2 font-medium text-left rtl:text-right border-b border-gray-200 cursor-pointer hover:bg-gray-100 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-600 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-500 dark:focus:text-white"
+          ></button>
+          <div class="flex justify-center w-full">
+            <label> Select Bots </label>
+          </div>
+          <div id="botlist">
+
+          </div>
+        </div>
       </div>
     </div>
   </body>
