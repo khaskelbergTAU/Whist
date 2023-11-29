@@ -1,7 +1,9 @@
 package il.arazim.plugins.user
 
 import il.arazim.concurrent.Uploader
+import il.arazim.getExecutablesDir
 import il.arazim.getRunResults
+import il.arazim.getSelected
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.application.*
@@ -13,7 +15,10 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import java.io.InputStream
+import kotlin.io.path.exists
 import kotlin.io.path.readText
+import kotlin.io.path.walk
+import kotlin.io.path.writeText
 
 fun Application.configureUserRouting() {
     install(AutoHeadResponse)
@@ -21,7 +26,7 @@ fun Application.configureUserRouting() {
         exception<ParameterException> { call, cause ->
             call.respondText(
                 status = HttpStatusCode.BadRequest,
-                text = "Invalid form parameters: ${cause.params.joinToString(", ")}. Message: ${cause.message}"
+                text = "Invalid parameters: ${cause.params.joinToString(", ")}. Message: ${cause.message}"
             )
         }
         exception<Throwable> { call, cause ->
@@ -81,20 +86,58 @@ fun Application.configureUserRouting() {
                     call.respondOk()
                 }
             }
-        }
-        route("/run") {
-            get("/results") {
-                val results = getRunResults().readText(Charsets.UTF_8)
+            route("/run") {
+                get("/results") {
+                    val results = getRunResults().readText(Charsets.UTF_8)
 
-                if (results == "") {
-                    throw Exception("There has been no runs")
+                    if (results == "") {
+                        throw Exception("There has been no runs")
+                    }
+
+                    call.respondText(results)
                 }
+                get("/bots") {
+                    val group = call.principal<GroupPrincipal>()?.name
+                    if (group == null) {
+                        call.respond(UnauthorizedResponse())
+                        return@get
+                    }
 
-                call.respondText(results)
+                    val allCompilations = getExecutablesDir(group).toFile().list()
+                        .filterNot { it.endsWith(".failed") }
+
+                    val selected = getSelected(group).readText()
+
+                    call.respondText("""
+                    {
+                    "unselected": [${allCompilations.filterNot { it == selected }.joinToString(separator = "\", \"", prefix = "\"", postfix = "\"")}],
+                    "selected": "$selected"
+                    }
+                    """.trimIndent())
+                }
+                post("select") {
+                    val group = call.principal<GroupPrincipal>()?.name
+                    if (group == null) {
+                        call.respond(UnauthorizedResponse())
+                        return@post
+                    }
+
+                    val botName = call.request.queryParameters["bot"] ?: throw ParameterException("bot", "Bot name is missing")
+
+                    if (!getExecutablesDir(group).resolve(botName).exists()) {
+                        call.respond(status = HttpStatusCode.BadRequest, """
+                            Bot doesn't exist
+                        """.trimIndent())
+                    }
+
+                    getSelected(group).writeText(botName)
+
+                    call.respondOk()
+                }
             }
-        }
-        post("/logout") {
-            call.respondRedirect("/")
+            post("/logout") {
+                call.respondRedirect("/")
+            }
         }
     }
 }

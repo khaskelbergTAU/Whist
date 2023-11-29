@@ -21,8 +21,8 @@ class Uploader private constructor(private val group: String) {
         val botName: String
         mutex.withLock {
             var resolveOverride = 0
-            while (getSourceDir(group).resolve("${name}_$resolveOverride.c").exists()) resolveOverride++
-            botName = "${name.toPath().normalize().fileName}_$resolveOverride"
+            while (getSourceDir(group).resolve("${name}_${resolveOverride.takeUnless { it == 0 } ?: ""}.c").exists()) resolveOverride++
+            botName = "${name.toPath().normalize().fileName}${if (resolveOverride != 0) "_$resolveOverride" else ""}"
             savePath = getSourceDir(group).resolve("$botName.c")
         }
         savePath.writeBytes(bytes.readBytes())
