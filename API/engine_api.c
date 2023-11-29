@@ -23,6 +23,13 @@ const int FINAL_BET_TIMEOUT_MS = 12;
 const int PLAY_CARD_TIMEOUT_MS = 10;
 const int GAME_OVER_TIMEOUT_MS = 5;
 
+extern const bet_t BET_PASS = {NONE, 0};
+extern const bet_t BET_NOT_PLAYED = {CLUBS, 0};
+extern const card_t EMPTY_CARD = {NONE, 0};
+extern const bet_t INVALID_BET = {(suit_e)-1, (size_t)-1};
+extern const card_t INVALID_CARD = {(suit_e)-1, (size_t)-1};
+extern const size_t INVALID_FINAL_BET = (size_t)-1;
+
 int player_in_fd[4];
 int player_out_fd[4];
 int player_err_fd[4];

@@ -3,10 +3,10 @@
 #include <stddef.h>
 typedef enum suit {
 	NONE,
+	SPADES,
 	HEARTS,
 	DIAMONDS,
 	CLUBS,
-	SPADES,
 } suit_e;
 
 typedef struct card {
@@ -18,11 +18,12 @@ typedef struct round {
 	card_t cards[4];
 } round_t, bets_t;
 
-const bet_t BET_PASS = {NONE, 0};
-const bet_t BET_NOT_PLAYED = {CLUBS, 0};
-const bet_t INVALID_BET = {(suit_e)-1, (size_t)-1};
-const card_t INVALID_CARD = {(suit_e)-1, (size_t)-1};
-const size_t INVALID_FINAL_BET = -1;
+extern const bet_t BET_PASS;
+extern const bet_t BET_NOT_PLAYED;
+extern const card_t EMPTY_CARD;
+extern const bet_t INVALID_BET;
+extern const card_t INVALID_CARD;
+extern const size_t INVALID_FINAL_BET;
 
 /* to be defined by player: */
 bet_t place_initial_bet(size_t player_position, card_t my_hand[13], bets_t previous_bets);

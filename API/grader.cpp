@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <bits/stdc++.h>
 
-#include "whist.h"
+#include "engine_api.h"
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 
@@ -69,18 +69,18 @@ card_t get_random_card(card_t hand[13], suit_e starting_suit) {
     }
     int cards_left = 0;
     for(int i = 0; i < 13; i++) {
-        if(compare_cards(hand[i], BET_PASS, NONE, NONE) != 0) {
+        if(compare_cards(hand[i], EMPTY_CARD, NONE, NONE) != 0) {
             starting_suit_count++;
         }
     }
     srand((unsigned)time(0));
     int i = rand() % cards_left;
     int j = 0;
-    while(compare_cards(hand[i], BET_PASS, NONE, NONE) == 0) {
+    while(compare_cards(hand[i], EMPTY_CARD, NONE, NONE) == 0) {
         j++;
     }
     for( ; j < i; j++) {
-        while(compare_cards(hand[i], BET_PASS, NONE, NONE) == 0) {
+        while(compare_cards(hand[i], EMPTY_CARD, NONE, NONE) == 0) {
             j++;
         }
     }
@@ -120,7 +120,7 @@ int hand_conatins_suit(card_t hand[13], suit_e suit) {
 void remove_card_from_hand(card_t hand[13], card_t card) {
     for(int i = 0; i < 13; i++) {
         if(compare_bets(hand[i], card) == 0) {
-            hand[i] = BET_PASS;
+            hand[i] = EMPTY_CARD;
             return;
         }
     }
@@ -232,7 +232,7 @@ void final_bets(bet_t highest_bet, size_t highest_bidder, size_t final_bets[4], 
 round_t play_round(card_t hands[4][13], size_t starting_player, round_t last_round, suit_e trump, int player_invalid[4]) {
     round_t current_round;
     for(int i = 0; i < 4; i++) {
-        current_round.cards[i] = BET_PASS;
+        current_round.cards[i] = EMPTY_CARD;
     }
     suit_e starting_suit = NONE;
     for(int player = 0; player < 4; player++) {
@@ -242,15 +242,15 @@ round_t play_round(card_t hands[4][13], size_t starting_player, round_t last_rou
         }
         if((compare_cards(played_card, INVALID_CARD, NONE, NONE) == 0) || player_invalid[(starting_player + player) % 4] || !legal_play(hands[(starting_player + player) % 4], played_card, starting_suit, trump)) {
             if(!player_invalid[(starting_player + player) % 4]) {
-                log_player_err((highest_bidder + player) % 4, "Invalid card: %d %d\n", played_card.suit, played_card.number);
+                log_player_err((starting_player + player) % 4, "Invalid card: %s %lu\n", suit_string(played_card.suit), played_card.number);
                 if(compare_cards(played_card, INVALID_CARD, NONE, NONE) == 0) {
-                    log_player_err((highest_bidder + player) % 4, "A timeout or other error occured\n");
-                } else if(!hand_contains_card(hand, card)) {
-                    log_player_err((highest_bidder + player) % 4, "Card is not in hand\n");
+                    log_player_err((starting_player + player) % 4, "A timeout or other error occured\n");
+                } else if(!hand_contains_card(hands[(starting_player + player) % 4], played_card)) {
+                    log_player_err((starting_player + player) % 4, "Card is not in hand\n");
                 } else {
-                    log_player_err((highest_bidder + player) % 4, "Card of the opening type not played despite having one\n");
+                    log_player_err((starting_player + player) % 4, "Card of the opening type not played despite having one\n");
                 }
-                clear_player((highest_bidder + player) % 4);
+                clear_player((starting_player + player) % 4);
             }
             player_invalid[(starting_player + player) % 4] = 1;
             if(player == 0) {
@@ -324,7 +324,7 @@ int main(int argc, char * argv[]) {
         final_bets(bet_data.first, starting_player, bets, player_invalid);
         round_t last_round;
         for(int i = 0; i < 4; i++) {
-            last_round.cards[i] = BET_PASS;
+            last_round.cards[i] = EMPTY_CARD;
         }
         size_t takes[4] = {0};
         for(int round = 0; round < 13; round++) {
