@@ -18,17 +18,17 @@ const char FINAL_BET_OP = 'f';
 const char PLAY_CARD_OP = 'p';
 const char GAME_OVER_OP = 'o';
 
-const int INITIAL_BET_TIMEOUT_MS = 35;
-const int FINAL_BET_TIMEOUT_MS = 12;
-const int PLAY_CARD_TIMEOUT_MS = 10;
-const int GAME_OVER_TIMEOUT_MS = 5;
+const int INITIAL_BET_TIMEOUT_MS = 3500;
+const int FINAL_BET_TIMEOUT_MS = 1200;
+const int PLAY_CARD_TIMEOUT_MS = 1000;
+const int GAME_OVER_TIMEOUT_MS = 500;
 
-extern const bet_t BET_PASS = {NONE, 0};
-extern const bet_t BET_NOT_PLAYED = {CLUBS, 0};
-extern const card_t EMPTY_CARD = {NONE, 0};
-extern const bet_t INVALID_BET = {(suit_e)-1, (size_t)-1};
-extern const card_t INVALID_CARD = {(suit_e)-1, (size_t)-1};
-extern const size_t INVALID_FINAL_BET = (size_t)-1;
+const bet_t BET_PASS = {NONE, 0};
+const bet_t BET_NOT_PLAYED = {CLUBS, 0};
+const card_t EMPTY_CARD = {NONE, 0};
+const bet_t INVALID_BET = {(suit_e)-1, (size_t)-1};
+const card_t INVALID_CARD = {(suit_e)-1, (size_t)-1};
+const size_t INVALID_FINAL_BET = (size_t)-1;
 
 int player_in_fd[4];
 int player_out_fd[4];
@@ -98,7 +98,7 @@ void set_player(size_t player_id, size_t exec_id) {
 	int stdout_fd[2];
 	assert(pipe(stdin_fd) == 0);
 	assert(pipe(stdout_fd) == 0);
-	if ((player_err_fd[player_id] = open(player_logfiles[player_id], O_WRONLY | O_CREAT | O_APPEND, 0666)) == -1) {
+	if ((player_err_fd[player_id] = open(player_logfiles[player_id], O_WRONLY | O_CREAT | O_TRUNC, 0666)) == -1) {
 		perror("open logfile");
 		exit(1);
 	}

@@ -155,8 +155,8 @@ const char * suit_string(suit_e suit) {
 }
 
 std::pair<bet_t, size_t> main_bets(card_t cards[4][13], int player_invalid[4]) {
-    int last_changed = 0;
-    int player = 0;
+    size_t last_changed = 0;
+    size_t player = 0;
     bet_t best_bet = {CLUBS, 0};
     bets_t bets;
     for(int i = 0; i < 4; i++) {
@@ -191,6 +191,7 @@ std::pair<bet_t, size_t> main_bets(card_t cards[4][13], int player_invalid[4]) {
             best_bet = bet;
             last_changed = 0;
         }
+        fprintf(stderr, "Player %lu bet %s %lu\n", player, suit_string(bet.suit), bet.number);
         bets.cards[player] = bet;
         last_changed++;
         player = (player + 1) % 4;
@@ -226,6 +227,7 @@ void final_bets(bet_t highest_bet, size_t highest_bidder, size_t final_bets[4], 
             }
         }
         final_bets[(highest_bidder + player) % 4] = final_bet;
+        fprintf(stderr, "Player %lu put final bet %lu\n", (highest_bidder + player) % 4, final_bet);
     }
 }
 
@@ -263,6 +265,7 @@ round_t play_round(card_t hands[4][13], size_t starting_player, round_t last_rou
         }
         remove_card_from_hand(hands[(starting_player + player) % 4], played_card);
         current_round.cards[(starting_player + player) % 4] = played_card;
+        fprintf(stderr, "Player %lu played %s %lu\n", (starting_player + player) % 4, suit_string(played_card.suit), played_card.number);
     }
     return current_round;
 }
@@ -298,8 +301,8 @@ void update_results(size_t bets[4], size_t takes[4], int total_scores[4], int pl
 }
 
 int main(int argc, char * argv[]) {
-    if(argc != 11) {
-        printf("Usage: %s <player1> <player2> <player3> <player4> <log1> <log2> <log3> <log4> <games> <player replacer>\n", argv[0]);
+    if(argc != 10) {
+        printf("Usage: %s <player1> <player2> <player3> <player4> <log1> <log2> <log3> <log4> <games>\n", argv[0]);
     }
     for(int i = 0; i < 4; i++) {
         set_exec(i, argv[i + 1], argv[i + 5]);
@@ -328,6 +331,7 @@ int main(int argc, char * argv[]) {
         }
         size_t takes[4] = {0};
         for(int round = 0; round < 13; round++) {
+            fprintf(stderr, "Round %d\n", round + 1);
             last_round = play_round(hands, starting_player, last_round, trump, player_invalid);
             starting_player = get_winner(last_round, last_round.cards[starting_player].suit, trump);
             takes[starting_player]++;

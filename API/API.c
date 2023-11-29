@@ -2,6 +2,13 @@
 #include <stdio.h>
 #include "shared.h"
 
+const bet_t BET_PASS = {NONE, 0};
+const bet_t BET_NOT_PLAYED = {CLUBS, 0};
+const card_t EMPTY_CARD = {NONE, 0};
+const bet_t INVALID_BET = {(suit_e)-1, (size_t)-1};
+const card_t INVALID_CARD = {(suit_e)-1, (size_t)-1};
+const size_t INVALID_FINAL_BET = (size_t)-1;
+
 void init_bets_api() {
 	init_bets_args_t args;
 	bet_t result;
