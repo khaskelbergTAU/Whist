@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../API/whist.h"
+#include "whist.h"
 
 card_t hand[13];
 size_t position;

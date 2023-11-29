@@ -3,7 +3,7 @@
 #include <time.h>
 #include <stdlib.h>
 
-#include "../API/whist.h"
+#include "whist.h"
 
 card_t get_random_card(card_t hand[13], suit_e starting_suit) {
 	srand(time(0));
