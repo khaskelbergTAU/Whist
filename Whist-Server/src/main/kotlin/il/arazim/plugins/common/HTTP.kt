@@ -1,7 +1,6 @@
-package il.arazim.user.plugins
+package il.arazim.plugins.common
 
 import io.ktor.server.application.*
-import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.defaultheaders.*
 
 fun Application.configureHTTP() {

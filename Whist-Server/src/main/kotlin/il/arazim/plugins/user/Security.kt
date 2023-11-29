@@ -1,4 +1,4 @@
-package il.arazim.user.plugins
+package il.arazim.plugins.user
 
 import il.arazim.toPath
 import io.ktor.server.application.*
@@ -7,7 +7,7 @@ import java.nio.file.Path
 import java.security.MessageDigest
 import kotlin.text.Charsets.UTF_8
 
-fun Application.configuerAuthentication() {
+fun Application.configureUserAuthentication() {
     authentication {
         val userRealm = "user-access"
         val userTable: Map<String, ByteArray> = mapOf(

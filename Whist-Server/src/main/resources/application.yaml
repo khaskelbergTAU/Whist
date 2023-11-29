@@ -1,6 +1,7 @@
 ktor:
   application:
     modules:
-      - il.arazim.ApplicationKt.module
+      - il.arazim.ApplicationKt.userModule
+      - il.arazim.ApplicationKt.adminModule
   deployment:
     port: 8080

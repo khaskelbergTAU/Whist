@@ -1,4 +1,4 @@
-package il.arazim.user.plugins
+package il.arazim.plugins.user
 
 import il.arazim.concurrent.Uploader
 import il.arazim.getRunResults
@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 import java.io.InputStream
 import kotlin.io.path.*
 
-fun Application.configureRouting() {
+fun Application.configureUserRouting() {
     install(AutoHeadResponse)
     install(StatusPages) {
         exception<ParameterException> { call, cause ->
