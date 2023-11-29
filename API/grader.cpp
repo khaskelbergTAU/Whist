@@ -6,7 +6,7 @@
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 
 #ifdef DEBUG_PRINT
-#define dbprintf printf
+#define dbprintf fprintf
 #else
 #define dbprintf(...)
 #endif
@@ -72,9 +72,6 @@ card_t get_random_card(card_t hand[13], suit_e starting_suit) {
 				i--;
 				j++;
 			}
-			if(hand[j].suit == NONE) {
-				dbprintf(stderr, "boolbool2\n");
-			}
 			return hand[j];
 		}
 	}
@@ -94,9 +91,6 @@ card_t get_random_card(card_t hand[13], suit_e starting_suit) {
 		if(!i) break;
 		i--;
 		j++;
-	}
-	if(hand[j].suit == NONE) {
-		dbprintf(stderr, "boolbool\n");
 	}
 	return hand[j];
 }
@@ -141,6 +135,10 @@ void remove_card_from_hand(card_t hand[13], card_t card) {
 }
 
 int legal_play(card_t hand[13], card_t card, suit_e starting_suit, suit_e trump) {
+	if(card.number <= 1) return 0;
+	if(card.number > 14) return 0;
+	if(card.suit > CLUBS) return 0;
+	if(card.suit == NONE) return 0;
 	if(!hand_contains_card(hand, card)) {
 		return 0;
 	}
@@ -183,7 +181,7 @@ std::pair<bet_t, size_t> main_bets(card_t cards[4][13], int player_invalid[4]) {
 				log_player_err(player, "Invalid initial bet: %s %lu\n", suit_string(bet.suit), bet.number);
 				dbprintf(stderr, "Invalid initial bet: %s %lu\n", suit_string(bet.suit), bet.number);
 				if(compare_bets(bet, INVALID_BET) == 0) {
-					log_player_err(player, "A timeout or other error occured\n");
+					log_player_err(player, "A timeout or other error occured for place_initial_bet()\n");
 				} else if(compare_bets(bet, BET_PASS) != 0 && (bet.number < 4)) {
 					log_player_err(player, "Initial bet must be at least 4\n");
 				} else if(compare_bets(bet, BET_PASS) != 0 && (bet.number > 13)) {
@@ -225,7 +223,7 @@ void final_bets(bet_t highest_bet, size_t highest_bidder, size_t final_bets[4], 
 			if(!player_invalid[(highest_bidder + player) % 4]) {
 				log_player_err(player, "Invalid final bet: %lu\n", final_bet);
 				if(final_bet == INVALID_FINAL_BET) {
-					log_player_err((highest_bidder + player) % 4, "A timeout or other error occured\n");
+					log_player_err((highest_bidder + player) % 4, "A timeout or other error occured for place_final_bet()\n");
 				} else if(final_bet > 13) {
 					log_player_err((highest_bidder + player) % 4, "Final bet can't be more than 13\n");
 				} else if(player == 0 && final_bet < highest_bet.number) {
@@ -266,7 +264,7 @@ round_t play_round(card_t hands[4][13], size_t starting_player, round_t last_rou
 			if(!player_invalid[(starting_player + player) % 4]) {
 				log_player_err((starting_player + player) % 4, "Invalid card: %s %lu\n", suit_string(played_card.suit), played_card.number);
 				if(compare_cards(played_card, INVALID_CARD, NONE, NONE) == 0) {
-					log_player_err((starting_player + player) % 4, "A timeout or other error occured\n");
+					log_player_err((starting_player + player) % 4, "A timeout or other error occured from play_card()\n");
 				} else if(!hand_contains_card(hands[(starting_player + player) % 4], played_card)) {
 					log_player_err((starting_player + player) % 4, "Card is not in hand\n");
 				} else {
@@ -306,6 +304,9 @@ void update_results(size_t bets[4], size_t takes[4], int total_scores[4], int pl
 		if(player_invalid[i]) {
 			total_scores[i] -= 50;
 			fprintf(stderr, "Player %d was invalid\n", i);
+			if(i == 3) {
+				exit(-1);
+			}
 		} else if(bets[i] == takes[i]) {
 			if(bets[i] == 0) {
 				if(bets[0] + bets[1] + bets[2] + bets[3] < 13) {
@@ -331,7 +332,7 @@ int main(int argc, char * argv[]) {
 		printf("Usage: %s <player1> <player2> <player3> <player4> <log1> <log2> <log3> <log4> <games>\n", argv[0]);
 	}
 	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)
-    	perror("signal");
+		perror("signal");
 	for(int i = 0; i < 4; i++) {
 		set_exec(i, argv[i + 1], argv[i + 5]);
 		set_player(i, i);

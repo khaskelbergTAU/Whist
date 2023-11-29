@@ -106,6 +106,24 @@ void replace_with_random(size_t player_id) {
 }
 
 void clear_player(size_t player_id) {
+	if(player_in_fd[player_id] != -1) {
+		if(close(player_in_fd[player_id]) != 0) {
+			CRITICAL_ERROR("close(player_in_fd[player_id]) failed\n");
+		}
+		player_in_fd[player_id] = -1;
+	}
+	if(player_out_fd[player_id] != -1) {
+		if(close(player_out_fd[player_id]) != 0) {
+			CRITICAL_ERROR("close(player_out_fd[player_id]) failed\n");
+		}
+		player_out_fd[player_id] = -1;
+	}
+	if(player_err_fd[player_id] != -1) {
+		if(close(player_err_fd[player_id]) != 0) {
+			CRITICAL_ERROR("close(player_err_fd[player_id]) failed\n");
+		}
+		player_err_fd[player_id] = -1;
+	}
 	kill(player_pids[player_id], SIGKILL);
 	waitpid(player_pids[player_id], NULL, 0);
 }
@@ -182,14 +200,17 @@ bet_t place_initial_bet_api(size_t player_id, size_t player_position, card_t my_
 	args.previous_bets = previous_bets;
 	if(write(player_in_fd[player_id], &INITIAL_BET_OP, sizeof(char)) != sizeof(char)) {
 		fprintf(stderr, "first write failed in initial bet\n");
+		dprintf(player_err_fd[player_id], "first write failed in initial bet\n");
 		return INVALID_BET;
 	}
 	if(write(player_in_fd[player_id], &args, sizeof(args)) != sizeof(args)) {
 		fprintf(stderr, "second write failed in initial bet\n");
+		dprintf(player_err_fd[player_id], "first write failed in initial bet\n");
 		return INVALID_BET;
 	}
 	if(read_with_timeout(player_out_fd[player_id], &res, sizeof(res), INITIAL_BET_TIMEOUT_MS, player_id) != sizeof(res)) {
 		fprintf(stderr, "read failed in initial bet\n");
+		dprintf(player_err_fd[player_id], "second write failed in initial bet\n");
 		return INVALID_BET;
 	}
 	return res;
@@ -203,14 +224,17 @@ size_t place_final_bet_api(size_t player_id, suit_e trump, size_t highest_bidder
 	memcpy(args.final_bets, final_bets, sizeof(size_t) * 4);
 	if(write(player_in_fd[player_id], &FINAL_BET_OP, sizeof(char)) != sizeof(char)) {
 		fprintf(stderr, "first write failed in final bet\n");
+		dprintf(player_err_fd[player_id], "first write failed in final bet\n");
 		return INVALID_FINAL_BET;
 	}
 	if(write(player_in_fd[player_id], &args, sizeof(args)) != sizeof(args)) {
 		fprintf(stderr, "second write failed in final bet\n");
+		dprintf(player_err_fd[player_id], "second write failed in final bet\n");
 		return INVALID_FINAL_BET;
 	}
 	if(read_with_timeout(player_out_fd[player_id], &res, sizeof(res), FINAL_BET_TIMEOUT_MS, player_id) != sizeof(res)) {
 		fprintf(stderr, "read failed in final bet\n");
+		dprintf(player_err_fd[player_id], "read failed in final bet\n");
 		return INVALID_FINAL_BET;
 	}
 	return res;
@@ -223,14 +247,17 @@ card_t play_card_api(size_t player_id, round_t previous_round, round_t current_r
 	args.current_round = current_round;
 	if(write(player_in_fd[player_id], &PLAY_CARD_OP, sizeof(char)) != sizeof(char)) {
 		fprintf(stderr, "first write failed in play card\n");
+		dprintf(player_err_fd[player_id], "first write failed in play card\n");
 		return INVALID_CARD;
 	}
 	if(write(player_in_fd[player_id], &args, sizeof(args)) != sizeof(args)) {
 		fprintf(stderr, "second write failed in play card\n");
+		dprintf(player_err_fd[player_id], "second write failed in play card\n");
 		return INVALID_CARD;
 	}
 	if(read_with_timeout(player_out_fd[player_id], &res, sizeof(res), PLAY_CARD_TIMEOUT_MS, player_id) != sizeof(res)) {
 		fprintf(stderr, "read failed in play card\n");
+		dprintf(player_err_fd[player_id], "read failed in play card\n");
 		return INVALID_CARD;
 	}
 	return res;
@@ -242,14 +269,17 @@ void game_over_api(size_t player_id, round_t final_round) {
 	args.final_round = final_round;
 	if(write(player_in_fd[player_id], &GAME_OVER_OP, sizeof(char)) != 1) {
 		fprintf(stderr, "first write failed in game over\n");
+		dprintf(player_err_fd[player_id], "first write failed in game over\n");
 		return;
 	}
 	if(write(player_in_fd[player_id], &args, sizeof(args)) != sizeof(args)) {
 		fprintf(stderr, "second write failed in game over\n");
+		dprintf(player_err_fd[player_id], "second write failed in game over\n");
 		return;
 	}
 	if(read_with_timeout(player_out_fd[player_id], &res, sizeof(res), GAME_OVER_TIMEOUT_MS, player_id) != sizeof(int)) {
 		fprintf(stderr, "read failed in game over\n");
+		dprintf(player_err_fd[player_id], "read failed in game over\n");
 		return;
 	}
 }
