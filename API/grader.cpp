@@ -387,7 +387,7 @@ int main(int argc, char * argv[]) {
 		fprintf(stderr, "Trump: %s\n", trump == NONE ? "NO TRUMP" : suit_string(trump));
 		round_t last_round;
 		for(int i = 0; i < 4; i++) {
-			last_round.cards[i] = {NONE, bets[0]};
+			last_round.cards[i] = {trump, bets[i]};
 		}
 		size_t takes[4] = {0};
 		for(int round = 0; round < 13; round++) {
