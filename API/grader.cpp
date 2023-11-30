@@ -18,6 +18,7 @@
 }
 
 FILE *summary_file = NULL;
+int pperm[4] = {0, 1, 2, 3};
 
 int compare_bets(bet_t bet1, bet_t bet2) {
 	if(bet1.number > bet2.number) {
@@ -180,26 +181,26 @@ std::pair<bet_t, size_t> main_bets(card_t cards[4][13], int player_invalid[4]) {
 		bets.cards[i] = {CLUBS, 0};
 	}
 	while(last_changed < 4) {
-		bet_t bet = player_invalid[player] ? INVALID_BET : place_initial_bet_api(player, player, cards[player], bets);
+		bet_t bet = player_invalid[pperm[player]] ? INVALID_BET : place_initial_bet_api(pperm[player], player, cards[pperm[player]], bets);
 		if(compare_bets(bet, INVALID_BET) == 0 || bet.suit < 0 || bet.suit > 4 || (compare_bets(bet, BET_PASS) != 0 && (bet.number < 4 || bet.number > 13 || compare_bets(bet, best_bet) <= 0))) {
-			if(!player_invalid[player]) {
-				log_player_err(player, "Invalid initial bet: %s %lu\n", suit_string(bet.suit), bet.number);
+			if(!player_invalid[pperm[player]]) {
+				log_player_err(pperm[player], "Invalid initial bet: %s %lu\n", suit_string(bet.suit), bet.number);
 				dbprintf(stderr, "Invalid initial bet: %s %lu\n", suit_string(bet.suit), bet.number);
 				if(compare_bets(bet, INVALID_BET) == 0) {
-					log_player_err(player, "A timeout or other error occured for place_initial_bet()\n");
+					log_player_err(pperm[player], "A timeout or other error occured for place_initial_bet()\n");
 				} else if(compare_bets(bet, BET_PASS) != 0 && (bet.number < 4)) {
-					log_player_err(player, "Initial bet must be at least 4\n");
+					log_player_err(pperm[player], "Initial bet must be at least 4\n");
 				} else if(compare_bets(bet, BET_PASS) != 0 && (bet.number > 13)) {
-					log_player_err(player, "Initial bet must be at most 13\n");
+					log_player_err(pperm[player], "Initial bet must be at most 13\n");
 				} else if(bet.suit < 0 || bet.suit > 4) {
-					log_player_err(player, "Invalid bet suit\n");
+					log_player_err(pperm[player], "Invalid bet suit\n");
 				} else {
-					log_player_err(player, "Initial bet must be greater than the previous bet\n");
+					log_player_err(pperm[player], "Initial bet must be greater than the previous bet\n");
 				}
-				clear_player(player);
+				clear_player(pperm[player]);
 			}
-			player_invalid[player] = 1;
-			fprintf(stderr, "replacing initial bet for player %lu\n", player);
+			player_invalid[pperm[player]] = 1;
+			fprintf(stderr, "replacing initial bet for player %lu\n", pperm[player]);
 			if(compare_bets(best_bet, {CLUBS, 0}) == 0) {
 				bet = {CLUBS, 4};
 			} else {
@@ -210,8 +211,8 @@ std::pair<bet_t, size_t> main_bets(card_t cards[4][13], int player_invalid[4]) {
 			best_bet = bet;
 			last_changed = 0;
 		}
-		dbprintf(stderr, "Player %lu bet %s %lu\n", player, suit_string(bet.suit), bet.number);
-		smprintf("Player %lu bet %s %lu\n", player, suit_string(bet.suit), bet.number);
+		dbprintf(stderr, "Player %lu bet %s %lu\n", pperm[player], suit_string(bet.suit), bet.number);
+		smprintf("Player %lu bet %s %lu\n", pperm[player], suit_string(bet.suit), bet.number);
 		bets.cards[player] = bet;
 		last_changed++;
 		player = (player + 1) % 4;
@@ -224,23 +225,23 @@ void final_bets(bet_t highest_bet, size_t highest_bidder, size_t final_bets[4], 
 		final_bets[i] = 0;
 	}
 	for(int player = 0; player < 4; player++) {
-		size_t final_bet = player_invalid[(highest_bidder + player) % 4] ? INVALID_FINAL_BET : place_final_bet_api((highest_bidder + player) % 4, highest_bet.suit, highest_bidder, final_bets);
+		size_t final_bet = player_invalid[pperm[(highest_bidder + player) % 4]] ? INVALID_FINAL_BET : place_final_bet_api(pperm[(highest_bidder + player) % 4], highest_bet.suit, highest_bidder, final_bets);
 		if(final_bet == INVALID_FINAL_BET || final_bet > 13 || (player == 0 && final_bet < highest_bet.number) || (player == 3 && final_bets[0] + final_bets[1] + final_bets[2] + final_bets[3] + final_bet == 13)) {
-			if(!player_invalid[(highest_bidder + player) % 4]) {
-				log_player_err(player, "Invalid final bet: %lu\n", final_bet);
+			if(!player_invalid[pperm[(highest_bidder + player) % 4]]) {
+				log_player_err(pperm[(highest_bidder + player) % 4], "Invalid final bet: %lu\n", final_bet);
 				if(final_bet == INVALID_FINAL_BET) {
-					log_player_err((highest_bidder + player) % 4, "A timeout or other error occured for place_final_bet()\n");
+					log_player_err(pperm[(highest_bidder + player) % 4], "A timeout or other error occured for place_final_bet()\n");
 				} else if(final_bet > 13) {
-					log_player_err((highest_bidder + player) % 4, "Final bet can't be more than 13\n");
+					log_player_err(pperm[(highest_bidder + player) % 4], "Final bet can't be more than 13\n");
 				} else if(player == 0 && final_bet < highest_bet.number) {
-					log_player_err((highest_bidder + player) % 4, "Final bet for first player can't be lower than the initial bet\n");
+					log_player_err(pperm[(highest_bidder + player) % 4], "Final bet for first player can't be lower than the initial bet\n");
 				} else {
-					log_player_err((highest_bidder + player) % 4, "Sum of bets can't be 13\n");
+					log_player_err(pperm[(highest_bidder + player) % 4], "Sum of bets can't be 13\n");
 				}
-				clear_player((highest_bidder + player) % 4);
+				clear_player(pperm[(highest_bidder + player) % 4]);
 			}
-			player_invalid[(highest_bidder + player) % 4] = 1;
-			dbprintf(stderr, "replacing final bet for player %lu\n", (highest_bidder + player) % 4);
+			player_invalid[pperm[(highest_bidder + player) % 4]] = 1;
+			dbprintf(stderr, "replacing final bet for player %lu\n", pperm[(highest_bidder + player) % 4]);
 			if(player == 0) {
 				final_bet = highest_bet.number;
 			} else if(final_bets[0] + final_bets[1] + final_bets[2] + final_bets[3] + final_bet == 12) {
@@ -248,10 +249,10 @@ void final_bets(bet_t highest_bet, size_t highest_bidder, size_t final_bets[4], 
 			} else {
 				final_bet = 1;
 			}
-			clear_player((highest_bidder + player) % 4);
+			clear_player(pperm[(highest_bidder + player) % 4]);
 		}
 		final_bets[(highest_bidder + player) % 4] = final_bet;
-		dbprintf(stderr, "Player %lu put final bet %lu\n", (highest_bidder + player) % 4, final_bet);
+		dbprintf(stderr, "Player %lu put final bet %lu\n", pperm[(highest_bidder + player) % 4], final_bet);
 	}
 }
 
@@ -262,36 +263,36 @@ round_t play_round(card_t hands[4][13], size_t starting_player, round_t last_rou
 	}
 	suit_e starting_suit = NONE;
 	for(int player = 0; player < 4; player++) {
-		card_t played_card = player_invalid[(starting_player + player) % 4] ? INVALID_CARD : play_card_api((starting_player + player) % 4, last_round, current_round);
+		card_t played_card = player_invalid[pperm[(starting_player + player) % 4]] ? INVALID_CARD : play_card_api(pperm[(starting_player + player) % 4], last_round, current_round);
 		if(player == 0) {
 			starting_suit = played_card.suit;
 		}
-		if((compare_cards(played_card, INVALID_CARD, NONE, NONE) == 0) || !legal_play(hands[(starting_player + player) % 4], played_card, starting_suit, trump)) {
-			if(!player_invalid[(starting_player + player) % 4]) {
-				log_player_err((starting_player + player) % 4, "Invalid card: %s %lu\n", suit_string(played_card.suit), played_card.number);
+		if((compare_cards(played_card, INVALID_CARD, NONE, NONE) == 0) || !legal_play(hands[pperm[(starting_player + player) % 4]], played_card, starting_suit, trump)) {
+			if(!player_invalid[pperm[(starting_player + player) % 4]]) {
+				log_player_err(pperm[(starting_player + player) % 4], "Invalid card: %s %lu\n", suit_string(played_card.suit), played_card.number);
 				if(compare_cards(played_card, INVALID_CARD, NONE, NONE) == 0) {
-					log_player_err((starting_player + player) % 4, "A timeout or other error occured from play_card()\n");
-				} else if(!hand_contains_card(hands[(starting_player + player) % 4], played_card)) {
-					log_player_err((starting_player + player) % 4, "Card is not in hand\n");
+					log_player_err(pperm[(starting_player + player) % 4], "A timeout or other error occured from play_card()\n");
+				} else if(!hand_contains_card(hands[pperm[(starting_player + player) % 4]], played_card)) {
+					log_player_err(pperm[(starting_player + player) % 4], "Card is not in hand\n");
 				} else {
-					log_player_err((starting_player + player) % 4, "Card of the opening type not played despite having one\n");
+					log_player_err(pperm[(starting_player + player) % 4], "Card of the opening type not played despite having one\n");
 				}
-				clear_player((starting_player + player) % 4);
+				clear_player(pperm[(starting_player + player) % 4]);
 			}
-			player_invalid[(starting_player + player) % 4] = 1;
+			player_invalid[pperm[(starting_player + player) % 4]] = 1;
 			if(player == 0) {
 				starting_suit = NONE;
 			}
-			played_card = get_random_card(hands[(starting_player + player) % 4], starting_suit);
-			dbprintf(stderr, "replaced card for player %lu\n", (starting_player + player) % 4);
+			played_card = get_random_card(hands[pperm[(starting_player + player) % 4]], starting_suit);
+			dbprintf(stderr, "replaced card for player %lu\n", pperm[(starting_player + player) % 4]);
 			if(player == 0) {
 				starting_suit = played_card.suit;
 			}
 		}
-		remove_card_from_hand(hands[(starting_player + player) % 4], played_card);
+		remove_card_from_hand(hands[pperm[(starting_player + player) % 4]], played_card);
 		current_round.cards[(starting_player + player) % 4] = played_card;
-		dbprintf(stderr, "Player %lu played %s %lu\n", (starting_player + player) % 4, suit_string(played_card.suit), played_card.number);
-		smprintf("Player %lu played %s %lu\n", (starting_player + player) % 4, suit_string(played_card.suit), played_card.number);
+		dbprintf(stderr, "Player %lu played %s %lu\n", pperm[(starting_player + player) % 4], suit_string(played_card.suit), played_card.number);
+		smprintf("Player %lu played %s %lu\n", pperm[(starting_player + player) % 4], suit_string(played_card.suit), played_card.number);
 	}
 	return current_round;
 }
@@ -355,6 +356,7 @@ int main(int argc, char * argv[]) {
 	int total_scores[4] = {0};
 	int player_invalid[4] = {0};
 	for(int game = 0; game < games; game++) {
+		std::next_permutation(pperm, pperm + 4);
 		fprintf(stderr, "--------Starting game %d---------\n", game);
 		smprintf("Starting game %d:\n", game);
 		card_t hands[4][13];
@@ -384,7 +386,11 @@ int main(int argc, char * argv[]) {
 		fprintf(stderr, "Trump: %s\n", trump == NONE ? "NO TRUMP" : suit_string(trump));
 		round_t last_round;
 		for(int i = 0; i < 4; i++) {
+<<<<<<< Updated upstream
 			last_round.cards[i] = {trump, bets[i]};
+=======
+			last_round.cards[i] = {NONE, bets[i]};
+>>>>>>> Stashed changes
 		}
 		size_t takes[4] = {0};
 		for(int round = 0; round < 13; round++) {
@@ -404,6 +410,7 @@ int main(int argc, char * argv[]) {
 		smprintf("Takes: %s: %lu, %s: %lu, %s: %lu, %s: %lu\n", argv[1], takes[0], argv[2], takes[1], argv[3], takes[2], argv[4], takes[3]);
 		printf("%d,%d,%d,%d\n", total_scores[0], total_scores[1], total_scores[2], total_scores[3]);
 	}
+	printf("Final Scores: \nPlayer 0: %d\nPlayer 1: %d\nPlayer 2: %d\nPlayer 3: %d\n", total_scores[0], total_scores[1], total_scores[2], total_scores[3]);
 	for(int i = 0; i < 4; i++) {
 		clear_player(i);
 	}

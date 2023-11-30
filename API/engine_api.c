@@ -77,12 +77,16 @@ int read_with_timeout(int fd, void *res_buf, int read_sz, int timeout, size_t pl
 	int amt_read = 0;
 	int poll_res;
 	int read_res;
+	int status;
 	nfds_t nfds = 1;
 	pollfd[0].fd = fd;
 	pollfd[0].events = POLLIN;
 	cur_time = time_ms(schedstat_name);
 	end_time = cur_time + timeout;
 	while(amt_read != read_sz) {
+		if(waitpid(player_pids[player_id], &status, WNOHANG) != 0) {
+			break;
+		}
 		cur_time = time_ms(schedstat_name);
 		if(end_time - cur_time < 0) break;
 		poll_res = poll(pollfd, nfds, end_time - cur_time);
