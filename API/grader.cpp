@@ -392,7 +392,7 @@ int main(int argc, char * argv[]) {
 		fprintf(stderr, "Trump: %s\n", trump == NONE ? "NO TRUMP" : suit_string(trump));
 		round_t last_round;
 		for(int i = 0; i < 4; i++) {
-				last_round.cards[i] = {trump, bets[i]};
+			last_round.cards[i] = {trump, bets[i]};
 		}
 		size_t takes[4] = {0};
 		for(int round = 0; round < 13; round++) {
@@ -412,8 +412,13 @@ int main(int argc, char * argv[]) {
 		smprintf("Takes: %s: %lu, %s: %lu, %s: %lu, %s: %lu\n", argv[1], takes[0], argv[2], takes[1], argv[3], takes[2], argv[4], takes[3]);
 		printf("%d,%d,%d,%d\n", total_scores[0], total_scores[1], total_scores[2], total_scores[3]);
 	}
+	std::string pn0, pn1, pn2, pn3;
+	pn0 = basename(argv[1]);
+	pn1 = basename(argv[2]);
+	pn2 = basename(argv[3]);
+	pn3 = basename(argv[4]);
 	printf("=================================================================================\n");
-	printf("Final Scores: \nPlayer 0 (%s): %d\nPlayer 1 (%s): %d\nPlayer 2 (%s): %d\nPlayer 3 (%s): %d\n", argv[1], total_scores[0], argv[2], total_scores[1], argv[3], total_scores[2], argv[4], total_scores[3]);
+	printf("Final Scores: \nPlayer 0 (%s): %d\nPlayer 1 (%s): %d\nPlayer 2 (%s): %d\nPlayer 3 (%s): %d\n", pn0.c_str(), total_scores[0], pn1.c_str(), total_scores[1], pn2.c_str(), total_scores[2], pn3.c_str(), total_scores[3]);
 	printf("=================================================================================\n");
 	for(int i = 0; i < 4; i++) {
 		clear_player(i);
