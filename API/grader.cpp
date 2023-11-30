@@ -312,9 +312,6 @@ void update_results(size_t bets[4], size_t takes[4], int total_scores[4], int pl
 			total_scores[i] -= 50;
 			fprintf(stderr, "Player %d was invalid\n", i);
 			smprintf("Player %d: -50\n", i);
-			if(i == 3) {
-				exit(-1);
-			}
 		} else if(bets[i] == takes[i]) {
 			if(bets[i] == 0) {
 				if(bets[0] + bets[1] + bets[2] + bets[3] < 13) {
