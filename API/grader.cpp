@@ -383,11 +383,11 @@ int main(int argc, char * argv[]) {
 		dbprintf(stderr, "Starting final bets\n");
 		smprintf("Final bets:\n");
 		final_bets(bet_data.first, starting_player, bets, player_invalid);
-		fprintf(stderr, "Final bets:\n %lu, %lu, %lu, %lu", bets[0], bets[1], bets[2], bets[3]);
+		fprintf(stderr, "Final bets: %lu, %lu, %lu, %lu\n", bets[0], bets[1], bets[2], bets[3]);
 		fprintf(stderr, "Trump: %s\n", trump == NONE ? "NO TRUMP" : suit_string(trump));
 		round_t last_round;
 		for(int i = 0; i < 4; i++) {
-			last_round.cards[i] = EMPTY_CARD;
+			last_round.cards[i] = {trump, bets[i]};
 		}
 		size_t takes[4] = {0};
 		for(int round = 0; round < 13; round++) {
