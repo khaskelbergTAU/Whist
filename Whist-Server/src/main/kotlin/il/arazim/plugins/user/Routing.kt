@@ -1,8 +1,12 @@
 package il.arazim.plugins.user
 
-import il.arazim.*
 import il.arazim.concurrent.Runner
 import il.arazim.concurrent.Uploader
+import il.arazim.getAllBots
+import il.arazim.getRunDir
+import il.arazim.getSelected
+import il.arazim.plugins.admin.handleAdminUpload
+import il.arazim.toPath
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.application.*
@@ -13,7 +17,7 @@ import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.coroutines.launch
+import io.ktor.util.pipeline.*
 import java.io.InputStream
 import kotlin.io.path.exists
 import kotlin.io.path.readText
@@ -36,6 +40,17 @@ fun Application.configureUserRouting() {
         authenticate("user-auth") {
             staticResources("/", basePackage = "static/pages")
             post("/upload") {
+                val group = call.principal<GroupPrincipal>()?.name
+                if (group == null) {
+                    call.respond(UnauthorizedResponse())
+                    return@post
+                }
+
+                if (group == "admin") {
+                    handleAdminUpload()
+                    return@post
+                }
+
                 val multipart = call.receiveMultipart()
 
                 var botNameForm: String? = null
@@ -68,12 +83,6 @@ fun Application.configureUserRouting() {
                         status = HttpStatusCode.BadRequest,
                         text = "Bot name contains illegal characters. Only latin letters, numbers and underscores are accepted"
                     )
-                    return@post
-                }
-
-                val group = call.principal<GroupPrincipal>()?.name
-                if (group == null) {
-                    call.respond(UnauthorizedResponse())
                     return@post
                 }
 
@@ -209,7 +218,8 @@ fun Application.configureUserRouting() {
                 }
             }
             post("/logout") {
-                call.respondRedirect("/")
+                call.respond(status = HttpStatusCode.Unauthorized, message="")
+//                call.respondRedirect("/")
             }
             staticFiles(
                 remotePath = "/",
