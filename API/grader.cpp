@@ -361,7 +361,7 @@ int main(int argc, char * argv[]) {
 	int total_scores[4] = {0};
 	int player_invalid[4] = {0};
 	for(int game = 0; game < games; game++) {
-		//std::next_permutation(pperm, pperm + 4);
+		std::next_permutation(pperm, pperm + 4);
 		fprintf(stderr, "--------Starting game %d---------\n", game);
 		fprintf(stderr, "Player order: P%d P%d P%d P%d\n", pperm[0], pperm[1], pperm[2], pperm[3]);
 		smprintf("Starting game %d:\n", game);
