@@ -13,6 +13,7 @@ import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.coroutines.launch
 import java.io.InputStream
 import kotlin.io.path.exists
 import kotlin.io.path.readText
@@ -202,7 +203,7 @@ fun Application.configureUserRouting() {
                     val rounds = call.request.queryParameters["run_count"]?.toIntOrNull()
                         ?: throw ParameterException("run_count", "Invalid run count")
 
-                    Runner.getInstance(group).newRun(bots, rounds)
+                    Runner.getInstance(group).newRun(bots, rounds, this)
 
                     call.respondOk()
                 }

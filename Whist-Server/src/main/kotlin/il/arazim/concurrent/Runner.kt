@@ -15,7 +15,7 @@ class Runner private constructor(private val group: String) {
     private var currentJob: Job? = null
 
     @OptIn(ExperimentalPathApi::class)
-    suspend fun newRun(bots: List<String>, rounds: Int) {
+    suspend fun newRun(bots: List<String>, rounds: Int, coroutineScope: CoroutineScope) {
         assert(bots.size == 4)
 
         val findBot = { name: String ->
@@ -35,35 +35,44 @@ class Runner private constructor(private val group: String) {
 
             runDir.resolve("bots.txt").writeText(bots.joinToString(separator = "\n"))
 
-            currentJob = coroutineScope {
-                launch {
-                    val process = ProcessBuilder(
-                        "${apiDir.resolve("grader").absolutePathString()}",
-                        findBot(bots[0]).absolutePathString(),
-                        findBot(bots[1]).absolutePathString(),
-                        findBot(bots[2]).absolutePathString(),
-                        findBot(bots[3]).absolutePathString(),
-                        runDir.resolve("1.txt").absolutePathString(),
-                        runDir.resolve("2.txt").absolutePathString(),
-                        runDir.resolve("3.txt").absolutePathString(),
-                        runDir.resolve("4.txt").absolutePathString(),
-                        rounds.toString()
-                    )
-                        .also { LOGGER.info("Running as $group: ${it.command().joinToString(separator = " ")}") }
-                        .redirectError(runDir.resolve("stderr.txt").toFile())
-                        .redirectOutput(runDir.resolve("stdout.txt").toFile())
-                        .start()
-
-                    try {
-                        while (process.isAlive) yield()
-                    } finally {
-                        if (process.isAlive) process.destroy()
-                        if (process.isAlive) process.destroyForcibly()
+            currentJob = coroutineScope.launch(context = Dispatchers.IO) {
+                val process = ProcessBuilder(
+                    apiDir.resolve("grader").absolutePathString(),
+                    findBot(bots[0]).absolutePathString(),
+                    findBot(bots[1]).absolutePathString(),
+                    findBot(bots[2]).absolutePathString(),
+                    findBot(bots[3]).absolutePathString(),
+                    runDir.resolve("1.txt").absolutePathString(),
+                    runDir.resolve("2.txt").absolutePathString(),
+                    runDir.resolve("3.txt").absolutePathString(),
+                    runDir.resolve("4.txt").absolutePathString(),
+                    rounds.toString()
+                )
+                    .also { LOGGER.info("Running as $group: ${it.command().joinToString(separator = " ")}") }
+                    .redirectError(runDir.resolve("stderr.txt").toFile())
+                    .redirectOutput(runDir.resolve("stdout.txt").toFile())
+                    .start()
+                try {
+                    while (process.isAlive) {
+                        yield()
+                        if (!isActive) LOGGER.warn("$currentJob DIED!!!!!")
                     }
+                } finally {
+                    LOGGER.debug(
+                        "Job {} finalising. Active: {}. Process: PID {}, Alive: {}",
+                        currentJob,
+                        isActive,
+                        process.pid(),
+                        process.isAlive
+                    )
+                    if (process.isAlive) process.destroy()
+                    if (process.isAlive) process.destroyForcibly()
                 }
             }
+            LOGGER.debug("Job {} launched.", currentJob)
         }
     }
+
 
     companion object {
         private val INSTANCES = mutableMapOf<String, Runner>()
@@ -72,7 +81,7 @@ class Runner private constructor(private val group: String) {
         private val LOGGER = KtorSimpleLogger("il.arazim.Runner")
 
         suspend fun getInstance(group: String) = mutex.withLock {
-            return@withLock INSTANCES[group] ?: Runner(group)
+            return@withLock INSTANCES[group] ?: Runner(group).also { INSTANCES[group] = it }
         }
     }
 }
