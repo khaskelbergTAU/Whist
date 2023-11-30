@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
-
+#include <libgen.h>
 #include "engine_api.h"
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))
@@ -203,7 +203,7 @@ std::pair<bet_t, size_t> main_bets(card_t cards[4][13], int player_invalid[4]) {
 				clear_player(pperm[player]);
 			}
 			player_invalid[pperm[player]] = 1;
-			fprintf(stderr, "replacing initial bet for player %lu\n", pperm[player]);
+			fprintf(stderr, "replacing initial bet for player %d\n", pperm[player]);
 			if(compare_bets(best_bet, {CLUBS, 0}) == 0) {
 				bet = {CLUBS, 4};
 			} else {
@@ -215,7 +215,7 @@ std::pair<bet_t, size_t> main_bets(card_t cards[4][13], int player_invalid[4]) {
 			last_changed = 0;
 		}
 		dbprintf(stderr, "Player %lu bet %s %lu\n", pperm[player], suit_string(bet.suit), bet.number);
-		smprintf("Player %lu bet %s %lu\n", pperm[player], suit_string(bet.suit), bet.number);
+		smprintf("Player %d bet %s %lu\n", pperm[player], suit_string(bet.suit), bet.number);
 		bets.cards[player] = bet;
 		last_changed++;
 		player = (player + 1) % 4;
@@ -244,7 +244,7 @@ void final_bets(bet_t highest_bet, size_t highest_bidder, size_t final_bets[4], 
 				clear_player(pperm[(highest_bidder + player) % 4]);
 			}
 			player_invalid[pperm[(highest_bidder + player) % 4]] = 1;
-			dbprintf(stderr, "replacing final bet for player %lu\n", pperm[(highest_bidder + player) % 4]);
+			dbprintf(stderr, "replacing final bet for player %d\n", pperm[(highest_bidder + player) % 4]);
 			if(player == 0) {
 				final_bet = highest_bet.number;
 			} else if(final_bets[0] + final_bets[1] + final_bets[2] + final_bets[3] + final_bet == 12) {
@@ -295,7 +295,7 @@ round_t play_round(card_t hands[4][13], size_t starting_player, round_t last_rou
 		remove_card_from_hand(hands[pperm[(starting_player + player) % 4]], played_card);
 		current_round.cards[(starting_player + player) % 4] = played_card;
 		dbprintf(stderr, "Player %lu played %s %lu\n", pperm[(starting_player + player) % 4], suit_string(played_card.suit), played_card.number);
-		smprintf("Player %lu played %s %lu\n", pperm[(starting_player + player) % 4], suit_string(played_card.suit), played_card.number);
+		smprintf("Player %d played %s %lu\n", pperm[(starting_player + player) % 4], suit_string(played_card.suit), played_card.number);
 	}
 	return current_round;
 }
