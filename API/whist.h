@@ -1,6 +1,7 @@
 #ifndef _WHIST_H
 #define _WHIST_H
 #include <stddef.h>
+#include <stdio.h>
 
 #define LOGF(...) fprintf(stderr, __VA_ARGS__)
 
