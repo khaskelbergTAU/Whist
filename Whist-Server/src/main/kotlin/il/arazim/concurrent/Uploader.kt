@@ -63,7 +63,7 @@ class Uploader private constructor(private val group: String) {
         private val LOGGER = KtorSimpleLogger("il.arazim.Uploader")
 
         suspend fun getInstance(group: String) = mutex.withLock {
-            return@withLock INSTANCES[group] ?: Uploader(group)
+            return@withLock INSTANCES[group] ?: Uploader(group).also { INSTANCES[group] = it }
         }
     }
 }
