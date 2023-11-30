@@ -310,29 +310,29 @@ size_t get_winner(round_t round, suit_e starting_suit, suit_e trump) {
 void update_results(size_t bets[4], size_t takes[4], int total_scores[4], int player_invalid[4]) {
 	for(int i = 0; i < 4; i++) {
 		if(player_invalid[i]) {
-			total_scores[i] -= 50;
-			fprintf(stderr, "Player %d was invalid\n", i);
-			smprintf("Player %d: -50\n", i);
+			total_scores[pperm[i]] -= 50;
+			fprintf(stderr, "Player %d was invalid\n", pperm[i]);
+			smprintf("Player %d: -50\n", pperm[i]);
 		} else if(bets[i] == takes[i]) {
 			if(bets[i] == 0) {
 				if(bets[0] + bets[1] + bets[2] + bets[3] < 13) {
-					dbprintf(stderr, "Player %d: +50\n", i);
-					smprintf("Player %d: +50\n", i);
-					total_scores[i] += 50;
+					dbprintf(stderr, "Player %d: +50\n", pperm[i]);
+					smprintf("Player %d: +50\n", pperm[i]);
+					total_scores[pperm[i]] += 50;
 				} else {
-					dbprintf(stderr, "Player %d: +25\n", i);
-					smprintf("Player %d: +25\n", i);
-					total_scores[i] += 25;
+					dbprintf(stderr, "Player %d: +25\n", pperm[i]);
+					smprintf("Player %d: +25\n", pperm[i]);
+					total_scores[pperm[i]] += 25;
 				}
 			} else {
-				dbprintf(stderr, "Player %d: +%ld\n", i, 10 + bets[i] * bets[i]);
-				smprintf("Player %d: +%ld\n", i, 10 + bets[i] * bets[i]);
-				total_scores[i] += 10 + bets[i] * bets[i];
+				dbprintf(stderr, "Player %d: +%ld\n", pperm[i], 10 + bets[i] * bets[i]);
+				smprintf("Player %d: +%ld\n", pperm[i], 10 + bets[i] * bets[i]);
+				total_scores[pperm[i]] += 10 + bets[i] * bets[i];
 			}
 		} else {
-			dbprintf(stderr, "Player %d: -%d\n", i, 10 * ABS(((int) bets[i]) - ((int) takes[i])));
-			smprintf("Player %d: -%d\n", i, 10 * ABS(((int) bets[i]) - ((int) takes[i])));
-			total_scores[i] -= 10 * ABS(((int) bets[i]) - ((int) takes[i]));
+			dbprintf(stderr, "Player %d: -%d\n", pperm[i], 10 * ABS(((int) bets[i]) - ((int) takes[i])));
+			smprintf("Player %d: -%d\n", pperm[i], 10 * ABS(((int) bets[i]) - ((int) takes[i])));
+			total_scores[pperm[i]] -= 10 * ABS(((int) bets[i]) - ((int) takes[i]));
 		}
 	}
 }
@@ -407,7 +407,7 @@ int main(int argc, char * argv[]) {
 		printf("%d,%d,%d,%d\n", total_scores[0], total_scores[1], total_scores[2], total_scores[3]);
 	}
 	printf("=================================================================================\n");
-	printf("Final Scores: \nPlayer 0 (%s): %d\nPlayer 1(%s): %d\nPlayer 2(%s): %d\nPlayer 3(%s): %d\n", argv[1], total_scores[0], argv[2], total_scores[1], argv[3], total_scores[2], argv[4], total_scores[3]);
+	printf("Final Scores: \nPlayer 0 (%s): %d\nPlayer 1 (%s): %d\nPlayer 2 (%s): %d\nPlayer 3 (%s): %d\n", argv[1], total_scores[0], argv[2], total_scores[1], argv[3], total_scores[2], argv[4], total_scores[3]);
 	printf("=================================================================================\n");
 	for(int i = 0; i < 4; i++) {
 		clear_player(i);
