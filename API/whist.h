@@ -21,8 +21,11 @@ typedef struct round {
 	card_t cards[4];
 } round_t, bets_t;
 
+/* represents a pass */
 extern const bet_t BET_PASS;
+/* represents that the player has not had a turn to bet yet*/
 extern const bet_t BET_NOT_PLAYED;
+/* represents a non-existing card in a hand */
 extern const card_t EMPTY_CARD;
 
 /* return these values whenever an error occurs */
