@@ -19,6 +19,7 @@ fun Application.configureUserAuthentication() {
             "Ferma" to "Password didn't fit in the margin",
             "test" to "test",
             "Anna Zaks" to "0525381648",
+            "NNAE" to "yzarethebest",
         ).mapValues { (user, password) ->
             MessageDigest.getInstance("MD5").digest("$user:$userRealm:$password".toByteArray(UTF_8))
         }
