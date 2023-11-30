@@ -18,6 +18,7 @@ fun Application.configureUserAuthentication() {
             "Fibonacci" to "f(n)=f(n-1)+f(n-2)",
             "Ferma" to "Password didn't fit in the margin",
             "test" to "test",
+            "Anna Zaks" to "0525381648",
         ).mapValues { (user, password) ->
             MessageDigest.getInstance("MD5").digest("$user:$userRealm:$password".toByteArray(UTF_8))
         }
