@@ -386,11 +386,7 @@ int main(int argc, char * argv[]) {
 		fprintf(stderr, "Trump: %s\n", trump == NONE ? "NO TRUMP" : suit_string(trump));
 		round_t last_round;
 		for(int i = 0; i < 4; i++) {
-<<<<<<< Updated upstream
-			last_round.cards[i] = {trump, bets[i]};
-=======
-			last_round.cards[i] = {NONE, bets[i]};
->>>>>>> Stashed changes
+				last_round.cards[i] = {trump, bets[i]};
 		}
 		size_t takes[4] = {0};
 		for(int round = 0; round < 13; round++) {
@@ -407,10 +403,12 @@ int main(int argc, char * argv[]) {
 		}
 		update_results(bets, takes, total_scores, player_invalid);
 		fprintf(stderr, "Takes: %lu, %lu, %lu, %lu\n", takes[0], takes[1], takes[2], takes[3]);
-		smprintf("Takes: %s: %lu, %s: %lu, %s: %lu, %s: %lu\n", argv[1], takes[0], argv[2], takes[1], argv[3], takes[2], argv[4], takes[3]);
+		printf("Takes: %s: %lu, %s: %lu, %s: %lu, %s: %lu\n", argv[1], takes[0], argv[2], takes[1], argv[3], takes[2], argv[4], takes[3]);
 		printf("%d,%d,%d,%d\n", total_scores[0], total_scores[1], total_scores[2], total_scores[3]);
 	}
-	printf("Final Scores: \nPlayer 0: %d\nPlayer 1: %d\nPlayer 2: %d\nPlayer 3: %d\n", total_scores[0], total_scores[1], total_scores[2], total_scores[3]);
+	printf("=================================================================================\n");
+	printf("Final Scores: \nPlayer 0 (%s): %d\nPlayer 1(%s): %d\nPlayer 2(%s): %d\nPlayer 3(%s): %d\n", argv[1], total_scores[0], argv[2], total_scores[1], argv[3], total_scores[2], argv[4], total_scores[3]);
+	printf("=================================================================================\n");
 	for(int i = 0; i < 4; i++) {
 		clear_player(i);
 	}
