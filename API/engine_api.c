@@ -141,7 +141,7 @@ void set_player(size_t player_id, size_t exec_id) {
 	if(pipe(stdout_fd) != 0) {
 		CRITICAL_ERROR("pipe(stdout_fd) failed\n");
 	}
-	if ((player_err_fd[player_id] = open(player_logfiles[player_id], O_WRONLY | O_CREAT | O_TRUNC, 0666)) == -1) {
+	if ((player_err_fd[player_id] = open(player_logfiles[player_id], O_WRONLY | O_CREAT | O_APPEND, 0666)) == -1) {
 		CRITICAL_ERROR("open(player_logfiles[player_id], ...) failed\n");
 	}
 	pid_t child_pid = fork();
